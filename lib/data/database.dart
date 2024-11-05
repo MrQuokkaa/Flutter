@@ -1,11 +1,25 @@
+import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 // every day their own database
 // store weekday as int -> newDay check int and change if it's a new day
 
 class DataBase {
-  List<String> dList = <String>['MondayList', 'TuesdayList', 'WednesdayList', 'ThursdayList', 'FridayList', 'SaturdayList', 'SundayList', 'FreeList', 'toDoList'];
-  int Dindex = 0;
+  List dList = [
+    'MondayList',
+    'TuesdayList',
+    'WednesdayList',
+    'ThursdayList',
+    'FridayList',
+    'SaturdayList',
+    'SundayList',
+    'FreeList',
+    'toDoList'
+  ];
+
+  //+ day1.toString()
+  //DateTime Days = DateTime.now();
+  //var day1 = DateTime.now().weekday;
 
   List toDoList = [];
   List tdMonday = [];
@@ -16,7 +30,6 @@ class DataBase {
   List tdSaturday = [];
   List tdSunday = [];
   List tdFree = [];
-
 
   final _myBox = Hive.box('mybox');
 

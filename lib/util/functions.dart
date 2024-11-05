@@ -9,10 +9,10 @@ class Functions {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Welcome back Stefan!'),
-          content: Text(
-            'It\'s ' + dateDay + '\n'
-            'Do you have your usual plans today?'
-          ),
+          content: Text('It\'s ' +
+              dateDay +
+              '\n'
+                  'Do you have your usual plans today?'),
           actions: <Widget>[
             TextButton(
               style: TextButton.styleFrom(
@@ -40,5 +40,7 @@ class Functions {
 
   checkDay() {
     //check for current day -> int -> save to DB
+    final weekDay = DateTime.now();
+    print(weekDay.weekday);
   }
 }
