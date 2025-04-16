@@ -11,6 +11,9 @@ class HomePage extends StatelessWidget {
     Functions f = Functions();
 
     return Scaffold(
+      appBar: AppBar(
+        title: f.appBarDate(),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: (f.checkDay),
         backgroundColor: Colors.yellow,

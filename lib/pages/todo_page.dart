@@ -19,24 +19,39 @@ class _ToDoState extends State<ToDoPage> {
   final _myBox = Hive.box('mybox');
   DataBase db = DataBase();
   Functions f = Functions();
+  DateTime selectedDate = DateTime.now();
+  final _controller = TextEditingController();
 
   @override
   void initState() {
-    if (_myBox.get('TODOLIST') == null) {
+    if (_myBox.get('MONDAY_TODO') == null) {
       db.createInitialData();
-    } else {
-      db.loadDataBase();
     }
+    db.loadDataForDate(selectedDate);
     super.initState();
   }
 
-  final _controller = TextEditingController();
+  void _pickDate() async {
+    DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime(2025),
+      lastDate: DateTime(2100),
+    );
+
+    if (picked != null) {
+      setState(() {
+        selectedDate = picked;
+        db.loadDataForDate(selectedDate);
+      });
+    }
+  }
 
   void checkBoxChanged(bool? value, int index) {
     setState(() {
       db.toDoList[index][1] = !db.toDoList[index][1];
     });
-    db.updateDataBase();
+    db.updateDataForDate(selectedDate);
   }
 
   void saveNewTask() {
@@ -45,7 +60,7 @@ class _ToDoState extends State<ToDoPage> {
       _controller.clear();
     });
     Navigator.of(context).pop();
-    db.updateDataBase();
+    db.updateDataForDate(selectedDate);
   }
 
   void createNewTask() {
@@ -65,7 +80,11 @@ class _ToDoState extends State<ToDoPage> {
     setState(() {
       db.toDoList.removeAt(index);
     });
-    db.updateDataBase();
+    db.updateDataForDate(selectedDate);
+  }
+
+  String getFormattedDate(DateTime date) {
+    return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
   }
 
   @override
@@ -77,16 +96,37 @@ class _ToDoState extends State<ToDoPage> {
         backgroundColor: Colors.indigo,
         child: Icon(Icons.add),
       ),
-      body: ListView.builder(
-        itemCount: db.toDoList.length,
-        itemBuilder: (context, index) {
-          return ToDoTile(
-            taskName: db.toDoList[index][0],
-            taskCompleted: db.toDoList[index][1],
-            onChanged: (value) => checkBoxChanged(value, index),
-            deleteFunction: (context) => deleteTask(index),
-          );
-        },
+      body: Column(
+        children: [
+          SizedBox(height: 40),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                icon: Icon(Icons.calendar_month, size: 28),
+                onPressed: _pickDate,
+              ),
+              Text(
+                "Tasks for ${getFormattedDate(selectedDate)}",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(width: 48),
+            ],
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: db.toDoList.length,
+              itemBuilder: (context, index) {
+                return ToDoTile(
+                  taskName: db.toDoList[index][0],
+                  taskCompleted: db.toDoList[index][1],
+                  onChanged: (value) => checkBoxChanged(value, index),
+                  deleteFunction: (context) => deleteTask(index),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
