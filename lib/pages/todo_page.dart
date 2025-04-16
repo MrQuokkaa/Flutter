@@ -22,11 +22,10 @@ class _ToDoState extends State<ToDoPage> {
 
   @override
   void initState() {
-    if (_myBox.get('TODOLIST') == null) {
+    if (_myBox.get('MONDAY_TODO') == null) {
       db.createInitialData();
-    } else {
-      db.loadDataBase();
     }
+    db.loadDataForToday();
     super.initState();
   }
 
@@ -36,7 +35,7 @@ class _ToDoState extends State<ToDoPage> {
     setState(() {
       db.toDoList[index][1] = !db.toDoList[index][1];
     });
-    db.updateDataBase();
+    db.updateDataForToday();
   }
 
   void saveNewTask() {
@@ -45,7 +44,7 @@ class _ToDoState extends State<ToDoPage> {
       _controller.clear();
     });
     Navigator.of(context).pop();
-    db.updateDataBase();
+    db.updateDataForToday();
   }
 
   void createNewTask() {
@@ -65,7 +64,7 @@ class _ToDoState extends State<ToDoPage> {
     setState(() {
       db.toDoList.removeAt(index);
     });
-    db.updateDataBase();
+    db.updateDataForToday();
   }
 
   @override
