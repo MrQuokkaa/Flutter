@@ -23,14 +23,13 @@ class _MainPageState extends State<MainPage> {
 
   Functions f = Functions();
   int currentPage = 0;
-  String dateFull = DateFormat('EEEE, MMMM d').format(DateTime.now());
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(dateFull + 'th'), //th isn't always right 1, 2, 3
+        title: f.appBarDate(), //th isn't always right 1, 2, 3
       ),
       body: pages[currentPage],
       bottomNavigationBar: BottomNavigationBar(
@@ -45,19 +44,19 @@ class _MainPageState extends State<MainPage> {
         selectedItemColor: Colors.lightBlue,
         items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home), 
+            icon: Icon(Icons.home),
             label: "Home",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.article_outlined), 
+            icon: Icon(Icons.article_outlined),
             label: "To Do",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person), 
+            icon: Icon(Icons.person),
             label: "Profile",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings), 
+            icon: Icon(Icons.settings),
             label: "Settings",
           ),
         ],

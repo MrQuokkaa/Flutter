@@ -70,18 +70,8 @@ class _ToDoState extends State<ToDoPage> {
 
   @override
   Widget build(BuildContext context) {
-    f.checkDay();
-    int today = 0;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (today != f.checkDay()) {
-        today = f.checkDay();
-        f.OpenDialog(context);
-      }
-    });
-
     return Scaffold(
       backgroundColor: Colors.lightBlue[200],
-      
       floatingActionButton: FloatingActionButton(
         onPressed: createNewTask,
         backgroundColor: Colors.indigo,

@@ -38,6 +38,19 @@ class Functions {
     );
   }
 
+  appBarDate() {
+    final d = DateTime.now();
+    var dayOfMonth = d.day;
+    String dateFull = DateFormat('EEEE, MMMM d').format(DateTime.now());
+    return dayOfMonth == 1 || dayOfMonth == 21 || dayOfMonth == 31
+        ? Text(dateFull + 'st')
+        : dayOfMonth == 2 || dayOfMonth == 22
+            ? Text(dateFull + 'nd')
+            : dayOfMonth == 3 || dayOfMonth == 23
+                ? Text(dateFull + 'rd')
+                : Text(dateFull + 'th');
+  }
+
   checkDay() {
     //check for current day -> int -> save to DB
     final weekDay = DateTime.now();
