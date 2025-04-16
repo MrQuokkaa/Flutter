@@ -52,16 +52,18 @@ class DataBase {
     ]);
   }
 
-  void loadDataForToday() {
-    int today = DateTime.now().weekday;
-    String key = weekdayKeys[today]!;
+  void loadDataForDate(DateTime date) {
+    String key = _getKeyForDate(date);
     toDoList = _myBox.get(key) ?? [];
   }
 
-  void updateDataForToday() {
-    int today = DateTime.now().weekday;
-    String key = weekdayKeys[today]!;
+  void updateDataForDate(DateTime date) {
+    String key = _getKeyForDate(date);
     _myBox.put(key, toDoList);
+  }
+
+  String _getKeyForDate(DateTime date) {
+    return 'TODO_${date.year}${date.month.toString().padLeft(2, '0')}${date.day.toString().padLeft(2, '0')}';
   }
 
   void loadDataBase() {
