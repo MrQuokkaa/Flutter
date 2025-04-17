@@ -54,7 +54,13 @@ class DataBase {
 
   void loadDataForDate(DateTime date) {
     String key = _getKeyForDate(date);
-    toDoList = _myBox.get(key) ?? [];
+    if (_myBox.containsKey(key)) {
+      toDoList = _myBox.get(key) ?? [];
+    } else {
+      int weekday = date.weekday;
+      String defaultKey = _getWeekdayKey(weekday);
+      toDoList = List.from(_myBox.get(defaultKey) ?? []);
+    }
   }
 
   void updateDataForDate(DateTime date) {
@@ -62,11 +68,32 @@ class DataBase {
     _myBox.put(key, toDoList);
   }
 
+  void loadDataBase() {
+    toDoList = _myBox.get('TODOLIST') ?? [];
+  }
+
   String _getKeyForDate(DateTime date) {
     return 'TODO_${date.year}${date.month.toString().padLeft(2, '0')}${date.day.toString().padLeft(2, '0')}';
   }
 
-  void loadDataBase() {
-    toDoList = _myBox.get('TODOLIST') ?? [];
+  String _getWeekdayKey(int weekday) {
+    switch (weekday) {
+      case DateTime.monday:
+        return 'MONDAY_TODO';
+      case DateTime.tuesday:
+        return 'TUESDAY_TODO';
+      case DateTime.wednesday:
+        return 'WEDNESDAY_TODO';
+      case DateTime.thursday:
+        return 'THURSDAY_TODO';
+      case DateTime.friday:
+        return 'FRIDAY_TODO';
+      case DateTime.saturday:
+        return 'SATURDAY_TODO';
+      case DateTime.sunday:
+        return 'SUNDAY_TODO';
+      default:
+        return 'MONDAY_TODO';
+    }
   }
 }

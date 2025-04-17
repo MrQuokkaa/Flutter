@@ -1,5 +1,6 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../data/database.dart';
 import '../util/todo_tile.dart';
 import '../util/dialog_box.dart';
@@ -29,6 +30,21 @@ class _ToDoState extends State<ToDoPage> {
     }
     db.loadDataForDate(selectedDate);
     super.initState();
+  }
+
+  String getFormattedDate(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final tomorrow = today.add(Duration(days: 1));
+    final selected = DateTime(date.year, date.month, date.day);
+
+    if (selected == today) {
+      return "Today";
+    } else if (selected == tomorrow) {
+      return "Tomorrow";
+    } else {
+      return DateFormat('EEEE, d MMM').format(date);
+    }
   }
 
   void _pickDate() async {
@@ -83,10 +99,6 @@ class _ToDoState extends State<ToDoPage> {
     db.updateDataForDate(selectedDate);
   }
 
-  String getFormattedDate(DateTime date) {
-    return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -99,19 +111,17 @@ class _ToDoState extends State<ToDoPage> {
       body: Column(
         children: [
           SizedBox(height: 40),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              IconButton(
-                icon: Icon(Icons.calendar_month, size: 28),
-                onPressed: _pickDate,
+          Center(
+            child: GestureDetector(
+              onTap: _pickDate,
+              child: Text(
+                "~ Tasks for ${getFormattedDate(selectedDate)} ~",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              Text(
-                "Tasks for ${getFormattedDate(selectedDate)}",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(width: 48),
-            ],
+            ),
           ),
           Expanded(
             child: ListView.builder(
