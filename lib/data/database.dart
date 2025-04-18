@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-// every day their own database
-// store weekday as int -> newDay check int and change if it's a new day
-
 class DataBase {
   List toDoList = [];
 

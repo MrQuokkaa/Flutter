@@ -1,44 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 
 class Functions {
   String dateDay = DateFormat('EEEE').format(DateTime.now());
-  Future<void> OpenDialog(BuildContext context) {
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Welcome back Stefan!'),
-          content: Text('It\'s ' +
-              dateDay +
-              '\n'
-                  'Do you have your usual plans today?'),
-          actions: <Widget>[
-            TextButton(
-              style: TextButton.styleFrom(
-                textStyle: Theme.of(context).textTheme.labelLarge,
-              ),
-              child: const Text('No'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              style: TextButton.styleFrom(
-                textStyle: Theme.of(context).textTheme.labelLarge,
-              ),
-              child: const Text('Yes'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+
+  Future<String> getUserName() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('username') ?? '';
   }
 
-  appBarDate() {
+  String getGreeting(String name) {
+    final hour = DateTime.now().hour;
+    String baseGreeting;
+    if (hour < 12) {
+      baseGreeting = 'Good morning';
+    } else if (hour < 17) {
+      baseGreeting = 'Good afternoon';
+    } else {
+      baseGreeting = 'Good evening';
+    }
+    return '$baseGreeting, $name';
+  }
+
+  appBarText() {
     final d = DateTime.now();
     var dayOfMonth = d.day;
     String dateFull = DateFormat('EEEE, MMMM d').format(DateTime.now());
@@ -49,6 +34,11 @@ class Functions {
             : dayOfMonth == 3 || dayOfMonth == 23
                 ? Text(dateFull + 'rd')
                 : Text(dateFull + 'th');
+  }
+
+  Future<void> saveUserName(String name) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('username', name);
   }
 
   checkDay() {
