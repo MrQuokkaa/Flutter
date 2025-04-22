@@ -15,10 +15,10 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   final List<Widget> pages = [
-    const HomePage(),
-    const ToDoPage(),
-    const ProfilePage(),
-    const SettingsPage(),
+    HomePage(),
+    ToDoPage(),
+    ProfilePage(),
+    SettingsPage(),
   ];
 
   Functions f = Functions();
