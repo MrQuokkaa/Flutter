@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../pages/settings_page.dart';
 import '../pages/profile_page.dart';
 import '../pages/home_page.dart';
@@ -7,7 +6,7 @@ import '../pages/todo_page.dart';
 import '../util/functions.dart';
 
 class MainPage extends StatefulWidget {
-  const MainPage({Key? key}) : super(key: key);
+  const MainPage({super.key});
 
   @override
   State<MainPage> createState() => _MainPageState();
@@ -31,14 +30,13 @@ class _MainPageState extends State<MainPage> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentPage,
         onTap: (value) {
-          f.checkDay();
           setState(() {
             currentPage = value;
           });
         },
         unselectedItemColor: Colors.grey,
         selectedItemColor: Colors.lightBlue,
-        items: [
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: "Home",

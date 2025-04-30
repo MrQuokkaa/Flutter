@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class DataBase {
@@ -49,30 +48,6 @@ class DataBase {
     ]);
   }
 
-  void loadDataForDate(DateTime date) {
-    String key = _getKeyForDate(date);
-    if (_myBox.containsKey(key)) {
-      toDoList = _myBox.get(key) ?? [];
-    } else {
-      int weekday = date.weekday;
-      String defaultKey = _getWeekdayKey(weekday);
-      toDoList = List.from(_myBox.get(defaultKey) ?? []);
-    }
-  }
-
-  void updateDataForDate(DateTime date) {
-    String key = _getKeyForDate(date);
-    _myBox.put(key, toDoList);
-  }
-
-  void loadDataBase() {
-    toDoList = _myBox.get('TODOLIST') ?? [];
-  }
-
-  String _getKeyForDate(DateTime date) {
-    return 'TODO_${date.year}${date.month.toString().padLeft(2, '0')}${date.day.toString().padLeft(2, '0')}';
-  }
-
   String _getWeekdayKey(int weekday) {
     switch (weekday) {
       case DateTime.monday:
@@ -92,5 +67,44 @@ class DataBase {
       default:
         return 'MONDAY_TODO';
     }
+  }
+
+  void loadDataForDate(DateTime date) {
+    String key = _getKeyForDate(date);
+    if (_myBox.containsKey(key)) {
+      toDoList = _myBox.get(key) ?? [];
+    } else {
+      int weekday = date.weekday;
+      String defaultKey = _getWeekdayKey(weekday);
+      toDoList = List.from(_myBox.get(defaultKey) ?? []);
+    }
+  }
+
+  void loadDataBase() {
+    toDoList = _myBox.get('TODOLIST') ?? [];
+  }
+
+  void addTask(String taskName, DateTime date) {
+    toDoList.add([taskName, false]);
+    updateDataForDate(date);
+  }
+
+  void deleteTask(int index, DateTime date) {
+    toDoList.removeAt(index);
+    updateDataForDate(date);
+  }
+
+  void completeTask(int index, DateTime date) {
+    toDoList[index][1] = !toDoList[index][1];
+    updateDataForDate(date);
+  }
+
+  void updateDataForDate(DateTime date) {
+    String key = _getKeyForDate(date);
+    _myBox.put(key, toDoList);
+  }
+
+  String _getKeyForDate(DateTime date) {
+    return 'TODO_${date.year}${date.month.toString().padLeft(2, '0')}${date.day.toString().padLeft(2, '0')}';
   }
 }

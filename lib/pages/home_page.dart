@@ -3,7 +3,7 @@ import '../util/functions.dart';
 import '../data/database.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -39,11 +39,6 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: (f.checkDay),
-        backgroundColor: Colors.yellow,
-        child: const Icon(Icons.add),
       ),
       backgroundColor: Colors.amber,
       body: const Center(child: Text("Home")),
