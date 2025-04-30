@@ -3,7 +3,7 @@ import '../util/functions.dart';
 import '../pages/main_page.dart';
 
 class NameInputPage extends StatelessWidget {
-  NameInputPage({Key? key}) : super(key: key);
+  NameInputPage({super.key});
 
   final TextEditingController _controller = TextEditingController();
   final Functions f = Functions();
@@ -35,9 +35,11 @@ class NameInputPage extends StatelessWidget {
                 final name = _controller.text.trim();
                 if (name.isNotEmpty) {
                   await f.saveUserName(name);
-                  Navigator.of(context).pushReplacement(MaterialPageRoute(
-                    builder: (_) => const MainPage(),
-                  ));
+                  if (context.mounted) {
+                    Navigator.of(context).pushReplacement(MaterialPageRoute(
+                      builder: (_) => const MainPage(),
+                    ));
+                  }
                 }
               },
               child: const Text('Continue'),

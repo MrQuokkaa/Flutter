@@ -28,22 +28,16 @@ class Functions {
     var dayOfMonth = d.day;
     String dateFull = DateFormat('EEEE, MMMM d').format(DateTime.now());
     return dayOfMonth == 1 || dayOfMonth == 21 || dayOfMonth == 31
-        ? Text(dateFull + 'st')
+        ? Text('$dateFull st')
         : dayOfMonth == 2 || dayOfMonth == 22
-            ? Text(dateFull + 'nd')
+            ? Text('$dateFull nd')
             : dayOfMonth == 3 || dayOfMonth == 23
-                ? Text(dateFull + 'rd')
-                : Text(dateFull + 'th');
+                ? Text('$dateFull rd')
+                : Text('$dateFull th');
   }
 
   Future<void> saveUserName(String name) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('username', name);
-  }
-
-  checkDay() {
-    //check for current day -> int -> save to DB
-    final weekDay = DateTime.now();
-    print(weekDay.weekday);
   }
 }

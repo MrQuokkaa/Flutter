@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import '../data/database.dart';
 
 class EditWeekdayPage extends StatefulWidget {
   final String weekday;
@@ -10,40 +10,13 @@ class EditWeekdayPage extends StatefulWidget {
 }
 
 class _EditWeekdayPageState extends State<EditWeekdayPage> {
-  final _box = Hive.box('mybox');
-  List<List<dynamic>> tasks = [];
+  final DataBase db = DataBase();
   final TextEditingController _controller = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    final key = "${widget.weekday.toUpperCase()}_TODO";
-    tasks = List<List<dynamic>>.from(_box.get(key, defaultValue: []));
-  }
-
-  void saveTasks() {
-    final key = "${widget.weekday.toUpperCase()}_TODO";
-    _box.put(key, tasks);
-    Navigator.pop(context);
-  }
-
-  void addTask() {
-    setState(() {
-      tasks.add([_controller.text, false]);
-      _controller.clear();
-    });
-  }
-
-  void deleteTask(int index) {
-    setState(() {
-      tasks.removeAt(index);
-    });
-  }
-
-  void toggleComplete(int index) {
-    setState(() {
-      tasks[index][1] = !tasks[index][1];
-    });
+    db.loadDataForDate(DateTime.now());
   }
 
   @override
@@ -54,28 +27,69 @@ class _EditWeekdayPageState extends State<EditWeekdayPage> {
         actions: [
           IconButton(
             icon: Icon(Icons.save),
-            onPressed: saveTasks,
+            onPressed: () => setState(() {
+              db.updateDataForDate(DateTime.now());
+            }),
           ),
         ],
       ),
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              itemCount: tasks.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(tasks[index][0]),
-                  leading: Checkbox(
-                    value: tasks[index][1],
-                    onChanged: (_) => toggleComplete(index),
-                  ),
-                  trailing: IconButton(
-                    icon: Icon(Icons.delete),
-                    onPressed: () => deleteTask(index),
+            child: ReorderableListView(
+              buildDefaultDragHandles: false,
+              onReorder: (oldIndex, newIndex) {
+                setState(() {
+                  if (newIndex > oldIndex) {
+                    newIndex -= 1;
+                  }
+                  final item = db.toDoList.removeAt(oldIndex);
+                  db.toDoList.insert(newIndex, item);
+                });
+                db.updateDataForDate(DateTime.now());
+              },
+              children: db.toDoList.asMap().entries.map((entry) {
+                int index = entry.key;
+                var task = entry.value;
+                return Card(
+                  key: ValueKey(task[0]),
+                  elevation: 2,
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: AnimatedContainer(
+                    duration: Duration(milliseconds: 300),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Row(
+                      children: [
+                        ReorderableDragStartListener(
+                          index: index,
+                          child:
+                              Icon(Icons.drag_handle, color: Colors.grey[700]),
+                        ),
+                        SizedBox(width: 12),
+                        Checkbox(
+                          value: task[1],
+                          onChanged: (_) => setState(() {
+                            db.completeTask(index, DateTime.now());
+                          }),
+                        ),
+                        Expanded(
+                          child: Text(
+                            task[0],
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.redAccent),
+                          onPressed: () => db.deleteTask(index, DateTime.now()),
+                        ),
+                      ],
+                    ),
                   ),
                 );
-              },
+              }).toList(),
             ),
           ),
           Padding(
@@ -93,7 +107,7 @@ class _EditWeekdayPageState extends State<EditWeekdayPage> {
                 ),
                 SizedBox(width: 8),
                 ElevatedButton(
-                  onPressed: addTask,
+                  onPressed: () => db.addTask(_controller.text, DateTime.now()),
                   child: Text("Add"),
                 ),
               ],

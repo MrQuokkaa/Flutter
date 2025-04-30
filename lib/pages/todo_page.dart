@@ -1,3 +1,4 @@
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -5,9 +6,6 @@ import '../data/database.dart';
 import '../util/todo_tile.dart';
 import '../util/dialog_box.dart';
 import '../util/functions.dart';
-
-//import intl.dart for date + day
-// Day of week to int -> use int for databases
 
 class ToDoPage extends StatefulWidget {
   const ToDoPage({super.key});
@@ -63,48 +61,27 @@ class _ToDoState extends State<ToDoPage> {
     }
   }
 
-  void checkBoxChanged(bool? value, int index) {
-    setState(() {
-      db.toDoList[index][1] = !db.toDoList[index][1];
-    });
-    db.updateDataForDate(selectedDate);
-  }
-
-  void saveNewTask() {
-    setState(() {
-      db.toDoList.add([_controller.text, false]);
-      _controller.clear();
-    });
-    Navigator.of(context).pop();
-    db.updateDataForDate(selectedDate);
-  }
-
-  void createNewTask() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return DialogBox(
-          controller: _controller,
-          onSave: saveNewTask,
-          onCancel: () => Navigator.of(context).pop(),
-        );
-      },
-    );
-  }
-
-  void deleteTask(int index) {
-    setState(() {
-      db.toDoList.removeAt(index);
-    });
-    db.updateDataForDate(selectedDate);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.lightBlue[200],
       floatingActionButton: FloatingActionButton(
-        onPressed: createNewTask,
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return DialogBox(
+                controller: _controller,
+                onSave: () => setState(() {
+                  db.addTask(_controller.text, selectedDate);
+                  _controller.clear();
+                  Navigator.of(context).pop();
+                }),
+                onCancel: () => Navigator.of(context).pop(),
+              );
+            },
+          );
+        },
         backgroundColor: Colors.indigo,
         child: Icon(Icons.add),
       ),
@@ -124,16 +101,22 @@ class _ToDoState extends State<ToDoPage> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: db.toDoList.length,
-              itemBuilder: (context, index) {
-                return ToDoTile(
-                  taskName: db.toDoList[index][0],
-                  taskCompleted: db.toDoList[index][1],
-                  onChanged: (value) => checkBoxChanged(value, index),
-                  deleteFunction: (context) => deleteTask(index),
-                );
-              },
+            child: SlidableAutoCloseBehavior(
+              child: ListView.builder(
+                itemCount: db.toDoList.length,
+                itemBuilder: (context, index) {
+                  return ToDoTile(
+                    taskName: db.toDoList[index][0],
+                    taskCompleted: db.toDoList[index][1],
+                    onChanged: (_) => setState(() {
+                      db.completeTask(index, selectedDate);
+                    }),
+                    deleteFunction: (_) => setState(() {
+                      db.deleteTask(index, selectedDate);
+                    }),
+                  );
+                },
+              ),
             ),
           ),
         ],
