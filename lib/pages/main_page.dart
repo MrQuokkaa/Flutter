@@ -1,9 +1,6 @@
-import 'package:flutter/material.dart';
-import '../pages/settings_page.dart';
-import '../pages/profile_page.dart';
-import '../pages/home_page.dart';
-import '../pages/todo_page.dart';
-import '../util/functions.dart';
+import '../exports/package_exports.dart';
+import '../exports/page_exports.dart';
+import '../exports/util_exports.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});

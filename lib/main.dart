@@ -1,11 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:provider/provider.dart';
-import '../pages/name_input_page.dart';
-import '../theme/theme_provider.dart';
-import '../theme/app_themes.dart';
-import '../pages/main_page.dart';
+import '../exports/package_exports.dart';
+import '../exports/theme_exports.dart';
+import '../exports/page_exports.dart';
 
 void main() async {
   await Hive.initFlutter();
@@ -13,9 +8,12 @@ void main() async {
   // ignore: unused_local_variable
   var box = await Hive.openBox('mybox');
 
+  WidgetsFlutterBinding.ensureInitialized();
+  final themeProvider = await ThemeProvider.loadFromPrefs();
+
   runApp(
     ChangeNotifierProvider(
-      create: (_) => ThemeProvider(lightTheme),
+      create: (_) => themeProvider,
       child: const MainApp(),
     ),
   );
@@ -31,25 +29,52 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: themeProvider.themeData,
+          initialRoute: '/',
+          routes: {
+            '/': (context) => const PageDecider(),
+            '/main': (context) => const MainPage(),
+            '/nameInput': (context) => NameInputPage(),
+            '/settings': (context) => SettingsPage(),
+          },
+        );
+      }
+    );
+  }
+}
 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: themeProvider.themeData,
-      home: FutureBuilder<bool>(
-        future: _hasUserName(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
-          } else {
-            return snapshot.data == true 
-            ? const MainPage() 
-            : NameInputPage();
-          }
-        },
-      ),
+class PageDecider extends StatelessWidget {
+  const PageDecider({super.key});
+
+  Future<bool> _hasUserName() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('username') != null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<bool>(
+      future: _hasUserName(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Navigator.pushReplacementNamed(
+            context,
+            snapshot.data! ? '/main' : '/nameInput',
+          );
+        });
+
+        return const SizedBox.shrink();
+      },
     );
   }
 }

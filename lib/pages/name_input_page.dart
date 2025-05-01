@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import '../util/functions.dart';
-import '../pages/main_page.dart';
+import '../exports/package_exports.dart';
+import '../exports/util_exports.dart';
+import '../exports/page_exports.dart';
 
 class NameInputPage extends StatelessWidget {
   NameInputPage({super.key});
