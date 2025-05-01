@@ -1,15 +1,15 @@
-import 'package:flutter/material.dart';
-import '../data/database.dart';
+import '../../exports/package_exports.dart';
+import '../../exports/data_exports.dart';
 
-class EditWeekdayPage extends StatefulWidget {
+class DefaultTodoPage extends StatefulWidget {
   final String weekday;
-  const EditWeekdayPage({required this.weekday, super.key});
+  const DefaultTodoPage({required this.weekday, super.key});
 
   @override
-  State<EditWeekdayPage> createState() => _EditWeekdayPageState();
+  State<DefaultTodoPage> createState() => _DefaultTodoPageState();
 }
 
-class _EditWeekdayPageState extends State<EditWeekdayPage> {
+class _DefaultTodoPageState extends State<DefaultTodoPage> {
   final DataBase db = DataBase();
   final TextEditingController _controller = TextEditingController();
 

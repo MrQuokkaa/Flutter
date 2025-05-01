@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:intl/intl.dart';
+import '../exports/package_exports.dart';
 
 class Functions {
   String dateDay = DateFormat('EEEE').format(DateTime.now());
