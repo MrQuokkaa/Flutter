@@ -1,4 +1,3 @@
-export '../pages/settings/default_navigator_page.dart';
 export '../pages/settings/default_todo_page.dart';
 export '../pages/home_page.dart';
 export '../pages/main_page.dart';
