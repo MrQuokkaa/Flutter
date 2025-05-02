@@ -104,6 +104,14 @@ class DataBase {
     _myBox.put(key, toDoList);
   }
 
+  void loadDefaultDay(String weekday) {
+    toDoList = List.from(_myBox.get('${weekday.toUpperCase()}_TODO') ?? []);
+  }
+
+  void updateDefaultDay(String weekday) {
+    _myBox.put('${weekday.toUpperCase()}_TODO', toDoList);
+  }
+
   String _getKeyForDate(DateTime date) {
     return 'TODO_${date.year}${date.month.toString().padLeft(2, '0')}${date.day.toString().padLeft(2, '0')}';
   }

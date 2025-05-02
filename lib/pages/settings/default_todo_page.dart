@@ -16,20 +16,24 @@ class _DefaultTodoPageState extends State<DefaultTodoPage> {
   @override
   void initState() {
     super.initState();
-    db.loadDataForDate(DateTime.now());
+    db.loadDefaultDay(widget.weekday);
+  }
+
+  void _save() {
+    db.updateDefaultDay(widget.weekday);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Edit ${widget.weekday} Tasks"),
+        title: Text("${widget.weekday}"),
         actions: [
           IconButton(
             icon: Icon(Icons.save),
-            onPressed: () => setState(() {
-              db.updateDataForDate(DateTime.now());
-            }),
+            onPressed: () {
+              setState(_save);
+            },
           ),
         ],
       ),
@@ -46,7 +50,7 @@ class _DefaultTodoPageState extends State<DefaultTodoPage> {
                   final item = db.toDoList.removeAt(oldIndex);
                   db.toDoList.insert(newIndex, item);
                 });
-                db.updateDataForDate(DateTime.now());
+                _save();
               },
               children: db.toDoList.asMap().entries.map((entry) {
                 int index = entry.key;
@@ -70,9 +74,12 @@ class _DefaultTodoPageState extends State<DefaultTodoPage> {
                         SizedBox(width: 12),
                         Checkbox(
                           value: task[1],
-                          onChanged: (_) => setState(() {
-                            db.completeTask(index, DateTime.now());
-                          }),
+                          onChanged: (_) {
+                            setState(() {
+                              db.toDoList[index][1] = !db.toDoList[index][1];
+                              _save();
+                            });
+                          },
                         ),
                         Expanded(
                           child: Text(
@@ -83,7 +90,12 @@ class _DefaultTodoPageState extends State<DefaultTodoPage> {
                         ),
                         IconButton(
                           icon: Icon(Icons.delete, color: Colors.redAccent),
-                          onPressed: () => db.deleteTask(index, DateTime.now()),
+                          onPressed: () {
+                            setState(() {
+                              db.toDoList.removeAt(index);
+                              _save();
+                            });
+                          },
                         ),
                       ],
                     ),
@@ -107,7 +119,13 @@ class _DefaultTodoPageState extends State<DefaultTodoPage> {
                 ),
                 SizedBox(width: 8),
                 ElevatedButton(
-                  onPressed: () => db.addTask(_controller.text, DateTime.now()),
+                  onPressed: () {
+                    setState (() {
+                      db.toDoList.add([_controller.text, false]);
+                      _controller.clear();
+                      _save();
+                    });
+                  },
                   child: Text("Add"),
                 ),
               ],
