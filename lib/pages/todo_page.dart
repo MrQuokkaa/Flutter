@@ -1,7 +1,9 @@
 import 'package:flutter_slidable/flutter_slidable.dart';
 import '../exports/package_exports.dart';
+import '../exports/theme_exports.dart';
 import '../exports/data_exports.dart';
 import '../exports/util_exports.dart';
+
 
 class ToDoPage extends StatefulWidget {
   const ToDoPage({super.key});
@@ -60,7 +62,25 @@ class _ToDoState extends State<ToDoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.lightBlue[200],
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: GestureDetector(
+          onTap: _pickDate,
+          child: Text(
+            "~ Tasks for ${getFormattedDate(selectedDate)} ~",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        centerTitle: true,
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showDialog(
@@ -78,44 +98,25 @@ class _ToDoState extends State<ToDoPage> {
             },
           );
         },
-        backgroundColor: Colors.indigo,
+        backgroundColor: themeColor(context).primary,
         child: Icon(Icons.add),
       ),
-      body: Column(
-        children: [
-          SizedBox(height: 40),
-          Center(
-            child: GestureDetector(
-              onTap: _pickDate,
-              child: Text(
-                "~ Tasks for ${getFormattedDate(selectedDate)} ~",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: SlidableAutoCloseBehavior(
-              child: ListView.builder(
-                itemCount: db.toDoList.length,
-                itemBuilder: (context, index) {
-                  return ToDoTile(
-                    taskName: db.toDoList[index][0],
-                    taskCompleted: db.toDoList[index][1],
-                    onChanged: (_) => setState(() {
-                      db.completeTask(index, selectedDate);
-                    }),
-                    deleteFunction: (_) => setState(() {
-                      db.deleteTask(index, selectedDate);
-                    }),
-                  );
-                },
-              ),
-            ),
-          ),
-        ],
+      body: SlidableAutoCloseBehavior(
+        child: ListView.builder(
+          itemCount: db.toDoList.length,
+          itemBuilder: (context, index) {
+            return ToDoTile(
+              taskName: db.toDoList[index][0],
+              taskCompleted: db.toDoList[index][1],
+              onChanged: (_) => setState(() {
+                db.completeTask(index, selectedDate);
+              }),
+              deleteFunction: (_) => setState(() {
+                db.deleteTask(index, selectedDate);
+              }),
+            );
+          },
+        ),
       ),
     );
   }

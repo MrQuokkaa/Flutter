@@ -1,4 +1,5 @@
 import '../exports/package_exports.dart';
+import '../exports/theme_exports.dart';
 
 // ignore: must_be_immutable
 class MyButton extends StatelessWidget {
@@ -16,7 +17,7 @@ class MyButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialButton(
       onPressed: onPressed,
-      color: Colors.lightBlue,
+      color: themeColor(context).secondary,
       child: Text(text),
     );
   }

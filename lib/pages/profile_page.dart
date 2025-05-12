@@ -1,4 +1,5 @@
 import '../exports/package_exports.dart';
+import '../exports/theme_exports.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});

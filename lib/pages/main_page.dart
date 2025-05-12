@@ -1,4 +1,5 @@
 import '../exports/package_exports.dart';
+import '../exports/theme_exports.dart';
 import '../exports/page_exports.dart';
 import '../exports/util_exports.dart';
 
@@ -12,7 +13,6 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   final List<Widget> pages = [
     HomePage(),
-    ToDoPage(),
     ProfilePage(),
     SettingsPage(),
   ];
@@ -24,29 +24,23 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: pages[currentPage],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: currentPage,
-        onTap: (value) {
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: currentPage,
+        onDestinationSelected: (value) {
           setState(() {
             currentPage = value;
           });
         },
-        unselectedItemColor: Colors.grey,
-        selectedItemColor: Colors.lightBlue,
-        items: const [
-          BottomNavigationBarItem(
+        destinations: const [
+          NavigationDestination(
             icon: Icon(Icons.home),
             label: "Home",
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.article_outlined),
-            label: "To Do",
-          ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: Icon(Icons.person),
             label: "Profile",
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: Icon(Icons.settings),
             label: "Settings",
           ),

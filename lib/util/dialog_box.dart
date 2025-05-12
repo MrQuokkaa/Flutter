@@ -1,4 +1,5 @@
 import '../exports/package_exports.dart';
+import '../exports/theme_exports.dart';
 import '../exports/util_exports.dart';
 
 // ignore: must_be_immutable
@@ -17,7 +18,7 @@ class DialogBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: Colors.lightBlue[200],
+      backgroundColor: themeColor(context).primary,
       content: Container(
         height: 120,
         child: Column(

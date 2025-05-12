@@ -1,4 +1,5 @@
 import '../../exports/package_exports.dart';
+import '../../exports/theme_exports.dart';
 import '../../exports/data_exports.dart';
 
 class DefaultTodoPage extends StatefulWidget {
@@ -58,6 +59,7 @@ class _DefaultTodoPageState extends State<DefaultTodoPage> {
                 return Card(
                   key: ValueKey(task[0]),
                   elevation: 2,
+                  color: themeColor(context).primary,
                   margin:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: AnimatedContainer(
@@ -69,10 +71,11 @@ class _DefaultTodoPageState extends State<DefaultTodoPage> {
                         ReorderableDragStartListener(
                           index: index,
                           child:
-                              Icon(Icons.drag_handle, color: Colors.grey[700]),
+                              Icon(Icons.drag_handle, color: themeColor(context).tertiary),
                         ),
                         SizedBox(width: 12),
                         Checkbox(
+                          activeColor: themeColor(context).tertiary,
                           value: task[1],
                           onChanged: (_) {
                             setState(() {
@@ -119,6 +122,9 @@ class _DefaultTodoPageState extends State<DefaultTodoPage> {
                 ),
                 SizedBox(width: 8),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: themeColor(context).primary,
+                  ),
                   onPressed: () {
                     setState (() {
                       db.toDoList.add([_controller.text, false]);
