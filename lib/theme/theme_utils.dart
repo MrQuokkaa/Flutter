@@ -16,7 +16,7 @@ ThemeData buildCustomTheme({
     tertiary: tertiaryScheme.primary,
     onTertiary: tertiaryScheme.onPrimary,
 
-    background: brightness == Brightness.dark ? const Color(0xFF121212) : const Color(0xFFFFFFFF),
+    background: brightness == Brightness.dark ? const Color(0xFFFFFDFA) : const Color(0xFFFFFDFA),
     onBackground: brightness == Brightness.dark ? Colors.white : Colors.black,
     surface: brightness == Brightness.dark ? const Color(0xFF1E1E1E) : const Color(0xFFF7F7F7),
     onSurface: brightness == Brightness.dark ? Colors.white70 : Colors.black87,
@@ -25,6 +25,27 @@ ThemeData buildCustomTheme({
   return ThemeData(
     useMaterial3: true,
     colorScheme: scheme,
+    scaffoldBackgroundColor: scheme.background,
+    appBarTheme: AppBarTheme(
+      backgroundColor: scheme.background,
+    ),
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: scheme.background,
+      indicatorColor: preset.tertiary.withOpacity(0.2),
+      iconTheme: MaterialStateProperty.resolveWith((states) {
+        if (states.contains(MaterialState.selected)) {
+          return IconThemeData(color: preset.tertiary);
+        }
+      return IconThemeData(color: Colors.grey);
+      }),
+      labelTextStyle: MaterialStateProperty.resolveWith((states) {
+        return TextStyle(
+          color: states.contains(MaterialState.selected)
+            ? preset.tertiary
+            : scheme.onSurface.withOpacity(0.6),
+        );
+      }),
+    ),
   );
 }
 

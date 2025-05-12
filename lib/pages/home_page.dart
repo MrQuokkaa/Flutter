@@ -1,4 +1,6 @@
 import '../exports/package_exports.dart';
+import '../exports/theme_exports.dart';
+import '../exports/page_exports.dart';
 import '../exports/util_exports.dart';
 import '../exports/data_exports.dart';
 
@@ -40,8 +42,76 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      backgroundColor: Colors.amber,
-      body: const Center(child: Text("Home")),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            ValueListenableBuilder(
+              valueListenable: Hive.box('mybox').listenable(),
+              builder: (context, Box box, _) {
+                final today = DateTime.now();
+                final todayKey = db.getKeyForDate(today);
+                final weekdayKey = db.getWeekdayKey(today.weekday);
+
+                List toDoList = List.from(
+                  box.get(todayKey) ??
+                  box.get(weekdayKey, defaultValue: []),
+                );
+
+                final int uncompletedCount = toDoList.where((task) => task[1] == false).length;
+
+                final Icon leadingIcon = Icon(
+                  uncompletedCount > 0
+                    ? Icons.pending_actions
+                    : Icons.celebration,
+                  color: themeColor(context).tertiary,
+                );
+
+                final String titleText = 
+                  uncompletedCount > 0
+                    ? "Uncompleted Tasks"
+                    : "You've finished all tasks 🎉";
+
+                final Widget? subtitleText = 
+                  uncompletedCount > 0
+                    ? Text(
+                      "$uncompletedCount task${uncompletedCount == 1 ? '' : 's'} remaining",
+                      style: TextStyle(fontSize: 16),
+                    )
+                    : null;
+
+                return GestureDetector(
+                  onTap : () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ToDoPage(),
+                      ),
+                    );
+                  },
+                  child: Card(
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    color: themeColor(context).primary,
+                    child: ListTile(
+                      leading: leadingIcon,
+                      title: Text(
+                        titleText,
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      subtitle: subtitleText
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 20),
+            const Center(child: Text("Home Page Content Placeholder")),
+          ],
+        ),
+      ),
     );
   }
 }

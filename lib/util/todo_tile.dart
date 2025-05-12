@@ -1,5 +1,6 @@
 import 'package:flutter_slidable/flutter_slidable.dart';
 import '../exports/package_exports.dart';
+import '../exports/theme_exports.dart';
 
 // ignore: must_be_immutable
 class ToDoTile extends StatelessWidget {
@@ -36,7 +37,7 @@ class ToDoTile extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(24.0),
           decoration: BoxDecoration(
-            color: Colors.blue,
+            color: themeColor(context).primary,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
@@ -44,7 +45,7 @@ class ToDoTile extends StatelessWidget {
               Checkbox(
                 value: taskCompleted,
                 onChanged: onChanged,
-                activeColor: Colors.indigo[700],
+                activeColor: themeColor(context).tertiary,
               ),
               Text(
                 taskName,
