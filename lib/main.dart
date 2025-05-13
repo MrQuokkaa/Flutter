@@ -37,7 +37,6 @@ class MainApp extends StatelessWidget {
           initialRoute: '/',
           routes: {
             '/': (context) => const PageDecider(),
-            '/main': (context) => const MainPage(),
             '/nameInput': (context) => NameInputPage(),
             '/settings': (context) => SettingsPage(),
           },
@@ -50,15 +49,15 @@ class MainApp extends StatelessWidget {
 class PageDecider extends StatelessWidget {
   const PageDecider({super.key});
 
-  Future<bool> _hasUserName() async {
+  Future<String?> _loadUserName() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('username') != null;
+    return prefs.getString('username');
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
-      future: _hasUserName(),
+    return FutureBuilder<String?>(
+      future: _loadUserName(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Scaffold(
@@ -67,9 +66,13 @@ class PageDecider extends StatelessWidget {
         }
 
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          Navigator.pushReplacementNamed(
+          Navigator.pushReplacement(
             context,
-            snapshot.data! ? '/main' : '/nameInput',
+            MaterialPageRoute(
+              builder: (context) => snapshot.data != null
+              ? MainPage(userName: snapshot.data!)
+              : NameInputPage(),
+            ),
           );
         });
 

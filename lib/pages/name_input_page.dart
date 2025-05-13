@@ -37,11 +37,14 @@ class NameInputPage extends StatelessWidget {
                 if (name.isNotEmpty) {
                   await f.saveUserName(name);
                   if (context.mounted) {
-                    Navigator.of(context).pushReplacement(MaterialPageRoute(
-                      builder: (_) => const MainPage(),
-                    ));
-                  }
-                }
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MainPage(userName: name),
+                      ),
+                    );
+                  };
+                };
               },
               child: const Text('Continue'),
             ),
