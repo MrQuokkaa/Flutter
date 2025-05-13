@@ -5,7 +5,8 @@ import '../exports/util_exports.dart';
 import '../exports/data_exports.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final String userName;
+  const HomePage({super.key, required this.userName});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -14,30 +15,20 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final DataBase db = DataBase();
   final Functions f = Functions();
-  String userName = '';
-
-  @override
-  void initState() {
-    super.initState();
-    _loadName();
-  }
-
-  Future<void> _loadName() async {
-    final name = await f.getUserName();
-    setState(() => userName = name);
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        toolbarHeight: 100,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            f.appBarText(),
+            f.appBarText(context),
             Text(
-              f.getGreeting(userName),
-              style: const TextStyle(fontSize: 14),
+              f.getGreeting(widget.userName),
+              style: themeText(context).titleMedium,
             ),
           ],
         ),
@@ -54,34 +45,32 @@ class _HomePageState extends State<HomePage> {
                 final weekdayKey = db.getWeekdayKey(today.weekday);
 
                 List toDoList = List.from(
-                  box.get(todayKey) ??
-                  box.get(weekdayKey, defaultValue: []),
+                  box.get(todayKey) ?? box.get(weekdayKey, defaultValue: []),
                 );
 
-                final int uncompletedCount = toDoList.where((task) => task[1] == false).length;
+                final int uncompletedCount =
+                    toDoList.where((task) => task[1] == false).length;
 
                 final Icon leadingIcon = Icon(
                   uncompletedCount > 0
-                    ? Icons.pending_actions
-                    : Icons.celebration,
+                      ? Icons.pending_actions
+                      : Icons.celebration,
                   color: themeColor(context).tertiary,
                 );
 
-                final String titleText = 
-                  uncompletedCount > 0
+                final String titleText = uncompletedCount > 0
                     ? "Uncompleted Tasks"
                     : "You've finished all tasks 🎉";
 
-                final Widget? subtitleText = 
-                  uncompletedCount > 0
+                final Widget? subtitleText = uncompletedCount > 0
                     ? Text(
-                      "$uncompletedCount task${uncompletedCount == 1 ? '' : 's'} remaining",
-                      style: TextStyle(fontSize: 16),
-                    )
+                        "$uncompletedCount task${uncompletedCount == 1 ? '' : 's'} remaining",
+                        style: TextStyle(fontSize: 16),
+                      )
                     : null;
 
                 return GestureDetector(
-                  onTap : () {
+                  onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -96,13 +85,12 @@ class _HomePageState extends State<HomePage> {
                     ),
                     color: themeColor(context).primary,
                     child: ListTile(
-                      leading: leadingIcon,
-                      title: Text(
-                        titleText,
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      subtitle: subtitleText
-                    ),
+                        leading: leadingIcon,
+                        title: Text(
+                          titleText,
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        subtitle: subtitleText),
                   ),
                 );
               },

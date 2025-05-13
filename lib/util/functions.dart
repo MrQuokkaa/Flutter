@@ -1,4 +1,5 @@
 import '../exports/package_exports.dart';
+import '../exports/theme_exports.dart';
 
 class Functions {
   String dateDay = DateFormat('EEEE').format(DateTime.now());
@@ -21,17 +22,24 @@ class Functions {
     return '$baseGreeting, $name';
   }
 
-  appBarText() {
+  appBarText(BuildContext context) {
     final d = DateTime.now();
     var dayOfMonth = d.day;
     String dateFull = DateFormat('EEEE, MMMM d').format(DateTime.now());
-    return dayOfMonth == 1 || dayOfMonth == 21 || dayOfMonth == 31
-        ? Text('${dateFull}st')
-        : dayOfMonth == 2 || dayOfMonth == 22
-            ? Text('${dateFull}nd')
-            : dayOfMonth == 3 || dayOfMonth == 23
-                ? Text('${dateFull}rd')
-                : Text('${dateFull}th');
+    final suffix = (dayOfMonth == 1 || dayOfMonth == 21 || dayOfMonth == 31)
+        ? 'st'
+        : (dayOfMonth == 2 || dayOfMonth == 22)
+            ? 'nd'
+            : (dayOfMonth == 3 || dayOfMonth == 23)
+                ? 'rd'
+                : 'th';
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: Text(
+        '$dateFull$suffix',
+        style: themeText(context).headlineLarge,
+      ),
+    );
   }
 
   Future<void> saveUserName(String name) async {
