@@ -10,6 +10,7 @@ void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
   final themeProvider = await ThemeProvider.loadFromPrefs();
+  await Firebase.initializeApp();
 
   runApp(
     ChangeNotifierProvider(
@@ -22,11 +23,6 @@ void main() async {
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
-  Future<bool> _hasUserName() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('username') != null;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<ThemeProvider>(
@@ -37,8 +33,9 @@ class MainApp extends StatelessWidget {
           initialRoute: '/',
           routes: {
             '/': (context) => const PageDecider(),
-            '/nameInput': (context) => NameInputPage(),
-            '/settings': (context) => SettingsPage(),
+            '/login': (context) => const LoginPage(),
+            '/register': (context) => const RegisterPage(),
+            '/settings': (context) => const SettingsPage(),
           },
         );
       }
@@ -49,34 +46,20 @@ class MainApp extends StatelessWidget {
 class PageDecider extends StatelessWidget {
   const PageDecider({super.key});
 
-  Future<String?> _loadUserName() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('username');
-  }
-
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<String?>(
-      future: _loadUserName(),
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
+        } else if (snapshot.hasData) {
+          return MainPage(userName: snapshot.data!.email ?? 'User');
+        } else {
+          return const LoginPage();
         }
-
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => snapshot.data != null
-              ? MainPage(userName: snapshot.data!)
-              : NameInputPage(),
-            ),
-          );
-        });
-
-        return const SizedBox.shrink();
       },
     );
   }
