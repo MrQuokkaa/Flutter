@@ -27,23 +27,26 @@ ThemeData buildCustomTheme({
     onSurface: brightness == Brightness.dark ? Colors.white70 : Colors.black87,
   );
 
-  final textTheme = GoogleFonts.poppinsTextTheme().copyWith(
-    headlineLarge: GoogleFonts.getFont(
-      'Roboto Slab',
-      fontSize: 32,
+  final textTheme = TextTheme(
+    headlineLarge: TextStyle(
+      fontFamily: 'Roboto Slab',
+      fontSize: 24,
       fontWeight: FontWeight.w300,
       color: scheme.onBackground,
     ),
-    titleMedium: GoogleFonts.poppins(
+    titleMedium: TextStyle(
+      fontFamily: 'Poppins',
       fontSize: 18,
       fontWeight: FontWeight.w300,
       color: scheme.onBackground,
     ),
-    bodyMedium: GoogleFonts.poppins(
+    bodyMedium: TextStyle(
+      fontFamily: 'Poppins',
       fontSize: 14,
       color: scheme.onSurface,
     ),
-    labelSmall: GoogleFonts.poppins(
+    labelSmall: TextStyle(
+      fontFamily: 'Poppins',
       fontSize: 12,
       color: scheme.onSurface.withOpacity(0.6),
     ),
