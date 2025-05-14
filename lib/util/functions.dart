@@ -23,6 +23,7 @@ class Functions {
   }
 
   appBarText(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     final d = DateTime.now();
     var dayOfMonth = d.day;
     String dateFull = DateFormat('EEEE, MMMM d').format(DateTime.now());
@@ -37,7 +38,7 @@ class Functions {
       padding: const EdgeInsets.only(top: 8.0),
       child: Text(
         '$dateFull$suffix',
-        style: themeText(context).headlineLarge,
+        style: textTheme.headlineLarge,
       ),
     );
   }

@@ -18,6 +18,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -28,7 +30,7 @@ class _HomePageState extends State<HomePage> {
             f.appBarText(context),
             Text(
               f.getGreeting(widget.userName),
-              style: themeText(context).titleMedium,
+              style: textTheme.titleMedium,
             ),
           ],
         ),
@@ -43,6 +45,8 @@ class _HomePageState extends State<HomePage> {
                 final today = DateTime.now();
                 final todayKey = db.getKeyForDate(today);
                 final weekdayKey = db.getWeekdayKey(today.weekday);
+
+                db.loadDataForDate(today);
 
                 List toDoList = List.from(
                   box.get(todayKey) ?? box.get(weekdayKey, defaultValue: []),
