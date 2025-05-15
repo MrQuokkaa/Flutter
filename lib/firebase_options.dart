@@ -52,13 +52,6 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCGGtyURAiOiaQZO0m_T8CVR_XRr-4MI0A',
-    authDomain: 'tasklist-821cd.firebaseapp.com',
-    projectId: 'tasklist-821cd',
-    storageBucket: 'tasklist-821cd.firebasestorage.app',
-    messagingSenderId: '235289225846',
-    appId: '1:235289225846:web:a3e5c7e9327d28982c4d57',
-    measurementId: 'G-2Y7SH1E6KV'
+  
   );
 }
