@@ -23,60 +23,92 @@ class _SettingsPageState extends State<SettingsPage> {
   String selectedTheme = 'Blue';
   String? selectedDay = 'Select day';
 
+  List<String> hours = List.generate(24, (i) => i.toString().padLeft(2, '0') + ":00");
+  String selectedHour = '00:00';
+
   @override
   void initState() {
     super.initState();
-    selectedTheme =
-        Provider.of<ThemeProvider>(context, listen: false).themeName;
+    selectedTheme = Provider.of<ThemeProvider>(context, listen: false).themeName;
   }
 
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final textTheme = Theme.of(context).textTheme;
+    final settingsProvider = Provider.of<SettingsProvider>(context);
+    String selectedHour = settingsProvider.dayStartHour;
 
     final sortedPresets = presets.toList()
       ..sort((a, b) => a.name == selectedTheme
-          ? -1
-          : b.name == selectedTheme
-              ? 1
-              : 0);
+        ? -1
+        : b.name == selectedTheme
+            ? 1
+            : 0);
 
     return Scaffold(
-      appBar: AppBar(title: Text("Settings")),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Text(
+          "Settings",
+          style: textTheme.headlineLarge,
+        ),
+      ),
       body: ListView(
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("Change default tasks",
-                    style: TextStyle(fontSize: 16)),
-                DropdownButton<String>(
-                  value: selectedDay,
-                  items: ['Select day', ...weekdays].map((day) {
-                    return DropdownMenuItem<String>(
-                      value: day,
-                      child: Text(day),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    if (value == null || value == 'Select day') return;
-                    setState(() {
-                      selectedDay = value;
-                    });
-
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => DefaultTodoPage(weekday: value),
-                      ),
-                    ).then((_) {
-                      setState(() {
-                        selectedDay = 'Select day';
-                      });
-                    });
-                  },
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text("Change default tasks",
+                      style: TextStyle(fontSize: 16)
+                    ),
+                    DropdownButton<String>(
+                      value: selectedDay,
+                      items: ['Select day', ...weekdays].map((day) {
+                        return DropdownMenuItem<String>(
+                          value: day,
+                          child: Text(day),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value == null || value == 'Select day') return;
+                        setState(() => selectedDay = value);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                          builder: (_) => DefaultTodoPage(weekday: value),
+                          ),
+                        ).then((_) {
+                          setState(() => selectedDay = 'Select day');
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text("Day starts at", style: TextStyle(fontSize: 16)),
+                    DropdownButton<String>(
+                      value: selectedHour,
+                      items: hours.map((hour) {
+                        return DropdownMenuItem<String>(
+                          value: hour,
+                          child: Text(hour),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value == null) return;
+                        settingsProvider.setDayStartHour(value);
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -125,25 +157,37 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
           const Divider(),
           Padding(
-              padding: const EdgeInsets.all(16),
-              child: Container(
-                  height: 50,
-                  color: themeColor(context).primary,
-                  child: Center(child: Text('Current Primary Color')))),
+            padding: const EdgeInsets.all(16),
+            child: Container(
+              height: 50,
+              color: themeColor(context).primary,
+              child: Center(
+                child: Text('Current Primary Color')
+              ),
+            ),
+          ),
           const Divider(),
           Padding(
-              padding: const EdgeInsets.all(16),
-              child: Container(
-                  height: 50,
-                  color: themeColor(context).secondary,
-                  child: Center(child: Text('Current Secondary Color')))),
+            padding: const EdgeInsets.all(16),
+            child: Container(
+              height: 50,
+              color: themeColor(context).secondary,
+              child: Center(
+                child: Text('Current Secondary Color')
+              ),
+            ),
+          ),
           const Divider(),
           Padding(
-              padding: const EdgeInsets.all(16),
-              child: Container(
-                  height: 50,
-                  color: themeColor(context).tertiary,
-                  child: Center(child: Text('Current Tertiary Color'))))
+            padding: const EdgeInsets.all(16),
+            child: Container(
+              height: 50,
+              color: themeColor(context).tertiary,
+              child: Center(
+                child: Text('Current Tertiary Color')
+              ),
+            ),
+          ),
         ],
       ),
     );

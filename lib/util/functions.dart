@@ -60,12 +60,13 @@ class Functions {
     await prefs.setString('username', name);
   }
 
-  Future<User?> register(String email, String password) async {
+  Future<User?> register(String name, String email, String password) async {
     try {
       final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+      await userCredential.user!.updateDisplayName(name);
       return userCredential.user;
     } on FirebaseAuthException catch (e) {
       throw Exception(e.message ?? 'Registration failed');

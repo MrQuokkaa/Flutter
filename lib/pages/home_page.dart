@@ -15,7 +15,29 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final DataBase db = DataBase();
   final Functions f = Functions();
+  late DayWatcher _dayWatcher;
 
+  @override
+  void initState() {
+    super.initState();
+    _loadTodayTasks();
+    _dayWatcher = DayWatcher(onDayChanged: (newDay) {
+      db.loadDataForDate(newDay);
+      setState(() {});
+    });
+  }
+  
+  void _loadTodayTasks() {
+    final today = DateTime.now();
+    db.loadDataForDate(today);
+  }
+
+  @override
+  void dispose() {
+    _dayWatcher.dispose();
+    super.dispose();
+  }
+  
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;

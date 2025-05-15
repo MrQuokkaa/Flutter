@@ -26,7 +26,7 @@ class ThemeProvider with ChangeNotifier {
     await prefs.setString('brightness', _brightness.name);
   }
 
-  static Future<ThemeProvider> loadFromPrefs() async {
+  static Future<ThemeProvider> loadTheme() async {
     final prefs = await SharedPreferences.getInstance();
     final themeName = prefs.getString('theme') ?? 'Blue';
     final brightnessString = prefs.getString('brightness') ?? 'light';

@@ -54,11 +54,13 @@ class _LoginPageState extends State<LoginPage> {
                     _passwordController.text.trim(),
                   );
                   if (user != null && context.mounted) {
+                    final user = FirebaseAuth.instance.currentUser;
+                    final name = user?.displayName ?? user?.email ?? 'User';
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                         builder: (context) =>
-                            MainPage(userName: user.email ?? 'User'),
+                            MainPage(userName: name),
                       ),
                     );
                   }
