@@ -12,6 +12,7 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   final Functions f = Functions();
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   String? _error;
@@ -26,6 +27,14 @@ class _RegisterPageState extends State<RegisterPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text("Create a new account", style: TextStyle(fontSize: 20)),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _nameController,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Name',
+              ),
+            ),
             const SizedBox(height: 16),
             TextField(
               controller: _emailController,
@@ -48,17 +57,18 @@ class _RegisterPageState extends State<RegisterPage> {
               Text(_error!, style: const TextStyle(color: Colors.red)),
             ElevatedButton(
               onPressed: () async {
+                final name = _nameController.text.trim();
+                final email = _emailController.text.trim();
+                final password = _passwordController.text.trim();
+                
                 try {
-                  final user = await f.register(
-                    _emailController.text.trim(),
-                    _passwordController.text.trim(),
-                  );
+                  final user = await f.register(name, email, password);
                   if (user != null && context.mounted) {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                         builder: (context) =>
-                            MainPage(userName: user.email ?? 'User'),
+                            MainPage(userName: name ?? 'User'),
                       ),
                     );
                   }

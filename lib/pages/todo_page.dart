@@ -18,14 +18,29 @@ class _ToDoState extends State<ToDoPage> {
   Functions f = Functions();
   DateTime selectedDate = DateTime.now();
   final _controller = TextEditingController();
+  late DayWatcher _dayWatcher;
 
   @override
   void initState() {
+    super.initState();
+
     if (_myBox.get('MONDAY_TODO') == null) {
       db.createInitialData();
     }
     db.loadDataForDate(selectedDate);
-    super.initState();
+
+    _dayWatcher = DayWatcher(onDayChanged: (newLogicalDay) {
+      setState(() {
+        selectedDate = newLogicalDay;
+        db.loadDataForDate(selectedDate);
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _dayWatcher.dispose();
+    super.dispose();
   }
 
   String getFormattedDate(DateTime date) {

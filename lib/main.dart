@@ -9,12 +9,19 @@ void main() async {
   var box = await Hive.openBox('mybox');
 
   WidgetsFlutterBinding.ensureInitialized();
-  final themeProvider = await ThemeProvider.loadFromPrefs();
-  await Firebase.initializeApp();
+  final themeProvider = await ThemeProvider.loadTheme();
+  final settingsProvider = SettingsProvider();
+  await settingsProvider.loadSettings();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => themeProvider,
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => themeProvider),
+        ChangeNotifierProvider(create: (_) => settingsProvider),
+      ],
       child: const MainApp(),
     ),
   );
@@ -56,7 +63,9 @@ class PageDecider extends StatelessWidget {
             body: Center(child: CircularProgressIndicator()),
           );
         } else if (snapshot.hasData) {
-          return MainPage(userName: snapshot.data!.email ?? 'User');
+          final user = snapshot.data!;
+          final name = user.displayName ?? user.email ?? 'User';
+          return MainPage(userName: name);
         } else {
           return const LoginPage();
         }

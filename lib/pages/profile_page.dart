@@ -8,17 +8,23 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     final Functions f = Functions();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Text(
+          'Profile',
+          style: textTheme.headlineLarge,
+        ),
+      ),
       body: Container(
-        color: Colors.lightGreen,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text("Profile"),
+              const Text("Profile Page Content Placeholder"),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () async {
