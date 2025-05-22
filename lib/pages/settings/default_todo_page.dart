@@ -11,17 +11,61 @@ class DefaultTodoPage extends StatefulWidget {
 }
 
 class _DefaultTodoPageState extends State<DefaultTodoPage> {
-  final DataBase db = DataBase();
   final TextEditingController _controller = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  List<List<dynamic>> toDoList = [];
 
   @override
   void initState() {
     super.initState();
-    db.loadDefaultDay(widget.weekday);
+    _loadDefaultDay();
   }
 
-  void _save() {
-    db.updateDefaultDay(widget.weekday);
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadDefaultDay() async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return;
+
+    final doc = await _firestore
+      .collection('users')
+      .doc(uid)
+      .collection('defaultTodos')
+      .doc(widget.weekday)
+      .get();
+
+    if (doc.exists) {
+      final data = doc.data();
+      if (data != null && data['tasks'] is List) {
+        setState(() {
+          toDoList = List<List<dynamic>>.from(
+            data['tasks'].map((task) => [task['name'], task['completed']]),
+          );
+        });
+      }
+    }
+  }
+
+  Future<void> _save() async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return;
+
+    final tasks = toDoList.map((task) => {
+      'name': task[0],
+      'completed': task[1],
+    }).toList();
+
+    await _firestore
+      .collection('users')
+      .doc(uid)
+      .collection('defaultTodos')
+      .doc(widget.weekday)
+      .set({'tasks': tasks});
   }
 
   @override
@@ -32,8 +76,9 @@ class _DefaultTodoPageState extends State<DefaultTodoPage> {
         actions: [
           IconButton(
             icon: Icon(Icons.save),
-            onPressed: () {
-              setState(_save);
+            onPressed: () async {
+              await _save();
+              if (mounted) setState(() {});
             },
           ),
         ],
@@ -43,17 +88,16 @@ class _DefaultTodoPageState extends State<DefaultTodoPage> {
           Expanded(
             child: ReorderableListView(
               buildDefaultDragHandles: false,
-              onReorder: (oldIndex, newIndex) {
+              onReorder: (oldIndex, newIndex) async {
                 setState(() {
-                  if (newIndex > oldIndex) {
-                    newIndex -= 1;
-                  }
-                  final item = db.toDoList.removeAt(oldIndex);
-                  db.toDoList.insert(newIndex, item);
+                  if (newIndex > oldIndex) newIndex -= 1;
+                  final item = toDoList.removeAt(oldIndex);
+                  toDoList.insert(newIndex, item);
                 });
-                _save();
+                await _save();
+                if (mounted) setState (() {});
               },
-              children: db.toDoList.asMap().entries.map((entry) {
+              children: toDoList.asMap().entries.map((entry) {
                 int index = entry.key;
                 var task = entry.value;
                 return Card(
@@ -77,11 +121,12 @@ class _DefaultTodoPageState extends State<DefaultTodoPage> {
                         Checkbox(
                           activeColor: themeColor(context).tertiary,
                           value: task[1],
-                          onChanged: (_) {
+                          onChanged: (_) async {
                             setState(() {
-                              db.toDoList[index][1] = !db.toDoList[index][1];
-                              _save();
+                              toDoList[index][1] = !toDoList[index][1];
                             });
+                            await _save();
+                            if (mounted) setState (() {});;
                           },
                         ),
                         Expanded(
@@ -93,11 +138,12 @@ class _DefaultTodoPageState extends State<DefaultTodoPage> {
                         ),
                         IconButton(
                           icon: Icon(Icons.delete, color: Colors.redAccent),
-                          onPressed: () {
+                          onPressed: () async {
                             setState(() {
-                              db.toDoList.removeAt(index);
-                              _save();
+                              toDoList.removeAt(index);
                             });
+                            await _save();
+                            if (mounted) setState (() {});
                           },
                         ),
                       ],
@@ -125,12 +171,14 @@ class _DefaultTodoPageState extends State<DefaultTodoPage> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: themeColor(context).primary,
                   ),
-                  onPressed: () {
+                  onPressed: () async {
+                    if (_controller.text.trim().isEmpty) return;
                     setState (() {
-                      db.toDoList.add([_controller.text, false]);
+                      toDoList.add([_controller.text.trim(), false]);
                       _controller.clear();
-                      _save();
                     });
+                    await _save();
+                    if (mounted) setState (() {});
                   },
                   child: Text("Add"),
                 ),

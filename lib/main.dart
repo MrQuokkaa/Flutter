@@ -3,10 +3,7 @@ import '../exports/theme_exports.dart';
 import '../exports/page_exports.dart';
 
 void main() async {
-  await Hive.initFlutter();
-
   // ignore: unused_local_variable
-  var box = await Hive.openBox('mybox');
 
   WidgetsFlutterBinding.ensureInitialized();
   final themeProvider = await ThemeProvider.loadTheme();

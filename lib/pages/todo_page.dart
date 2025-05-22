@@ -13,8 +13,7 @@ class ToDoPage extends StatefulWidget {
 }
 
 class _ToDoState extends State<ToDoPage> {
-  final _myBox = Hive.box('mybox');
-  DataBase db = DataBase();
+  FirestoreDataBase db = FirestoreDataBase();
   Functions f = Functions();
   DateTime selectedDate = DateTime.now();
   final _controller = TextEditingController();
@@ -23,11 +22,7 @@ class _ToDoState extends State<ToDoPage> {
   @override
   void initState() {
     super.initState();
-
-    if (_myBox.get('MONDAY_TODO') == null) {
-      db.createInitialData();
-    }
-    db.loadDataForDate(selectedDate);
+    loadData();
 
     _dayWatcher = DayWatcher(onDayChanged: (newLogicalDay) {
       setState(() {
@@ -35,6 +30,26 @@ class _ToDoState extends State<ToDoPage> {
         db.loadDataForDate(selectedDate);
       });
     });
+  }
+
+  void loadData() async {
+    await db.loadDataForDate(selectedDate);
+    setState(() {});
+  }
+
+  Future<void> _pickDate() async {
+    DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime(2025),
+      lastDate: DateTime(2100),
+    );
+
+    if (picked != null) {
+      setState(() => selectedDate = picked);
+      await db.loadDataForDate(selectedDate);
+      setState(() {});
+    }
   }
 
   @override
@@ -55,22 +70,6 @@ class _ToDoState extends State<ToDoPage> {
       return "Tomorrow";
     } else {
       return DateFormat('EEEE, d MMM').format(date);
-    }
-  }
-
-  void _pickDate() async {
-    DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: selectedDate,
-      firstDate: DateTime(2025),
-      lastDate: DateTime(2100),
-    );
-
-    if (picked != null) {
-      setState(() {
-        selectedDate = picked;
-        db.loadDataForDate(selectedDate);
-      });
     }
   }
 
@@ -103,11 +102,12 @@ class _ToDoState extends State<ToDoPage> {
             builder: (context) {
               return DialogBox(
                 controller: _controller,
-                onSave: () => setState(() {
-                  db.addTask(_controller.text, selectedDate);
+                onSave: () async {
+                  await db.addTask(_controller.text, selectedDate);
                   _controller.clear();
                   Navigator.of(context).pop();
-                }),
+                  setState(() {});
+                },
                 onCancel: () => Navigator.of(context).pop(),
               );
             },
@@ -123,12 +123,14 @@ class _ToDoState extends State<ToDoPage> {
             return ToDoTile(
               taskName: db.toDoList[index][0],
               taskCompleted: db.toDoList[index][1],
-              onChanged: (_) => setState(() {
-                db.completeTask(index, selectedDate);
-              }),
-              deleteFunction: (_) => setState(() {
-                db.deleteTask(index, selectedDate);
-              }),
+              onChanged: (_) async {
+                await db.completeTask(index, selectedDate);
+                setState(() {});
+              },
+              deleteFunction: (_) async {
+                await db.deleteTask(index, selectedDate);
+                setState(() {});
+              },
             );
           },
         ),
