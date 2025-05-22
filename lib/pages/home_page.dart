@@ -13,23 +13,20 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final DataBase db = DataBase();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final Functions f = Functions();
   late DayWatcher _dayWatcher;
+
+  List<List<dynamic>> todayTasks = [];
 
   @override
   void initState() {
     super.initState();
     _loadTodayTasks();
     _dayWatcher = DayWatcher(onDayChanged: (newDay) {
-      db.loadDataForDate(newDay);
-      setState(() {});
+      _loadTasksForDate(newDay);
     });
-  }
-  
-  void _loadTodayTasks() {
-    final today = DateTime.now();
-    db.loadDataForDate(today);
   }
 
   @override
@@ -37,10 +34,89 @@ class _HomePageState extends State<HomePage> {
     _dayWatcher.dispose();
     super.dispose();
   }
+
+  Future<void> _loadTodayTasks() async {
+    final now = DateTime.now();
+    await _loadTasksForDate(now);
+  }
+
+  Future<void> _loadTasksForDate(DateTime date) async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return;
+
+    String _getWeekdayString(int weekday) {
+      const weekdays = [
+        "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+      ];
+      return weekdays[weekday - 1];
+    }
+
+    final todayKey = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+    final weekday = _getWeekdayString(date.weekday);
+
+    DocumentSnapshot<Map<String, dynamic>> dailyDoc = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('dailyTodos')
+        .doc(todayKey)
+        .get();
+
+    if (dailyDoc.exists) {
+      final tasks = dailyDoc.data()?['tasks'];
+      if (tasks is List) {
+        setState(() {
+          todayTasks = List<List<dynamic>>.from(
+            tasks.map((t) => [t['name'], t['completed']]),
+          );
+        });
+        return;
+      }
+    }
+
+    final defaultDoc = await _firestore
+      .collection('users')
+      .doc(uid)
+      .collection('defaultTodos')
+      .doc(weekday)
+      .get();
+
+    if (dailyDoc.exists) {
+      final tasks = dailyDoc.data()?['tasks'];
+      if (tasks is List) {
+        setState(() {
+          todayTasks = List<List<dynamic>>.from(
+            tasks.map((t) => [t['name'], t['completed']]),
+          );
+        });
+      } else {
+        setState(() {
+          todayTasks = [];
+        });
+      }
+    }
+  }
   
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final int uncompletedCount = todayTasks.where((task) => task[1] == false).length;
+
+    final Icon leadingIcon = Icon(
+      uncompletedCount > 0 ? Icons.pending_actions : Icons.celebration,
+      color: themeColor(context).tertiary,
+    );
+
+    final String titleText = uncompletedCount > 0
+      ? "Uncompleted Tasks"
+      : "You've finished all tasks 🎉";
+
+    final Widget? subtitleText = uncompletedCount > 0
+      ? Text(
+          "$uncompletedCount task${uncompletedCount == 1 ? '' : 's'} remaining",
+          style: TextStyle(fontSize: 16),
+        )
+      : null;
+
 
     return Scaffold(
       appBar: AppBar(
@@ -61,65 +137,28 @@ class _HomePageState extends State<HomePage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            ValueListenableBuilder(
-              valueListenable: Hive.box('mybox').listenable(),
-              builder: (context, Box box, _) {
-                final today = DateTime.now();
-                final todayKey = db.getKeyForDate(today);
-                final weekdayKey = db.getWeekdayKey(today.weekday);
-
-                db.loadDataForDate(today);
-
-                List toDoList = List.from(
-                  box.get(todayKey) ?? box.get(weekdayKey, defaultValue: []),
-                );
-
-                final int uncompletedCount =
-                    toDoList.where((task) => task[1] == false).length;
-
-                final Icon leadingIcon = Icon(
-                  uncompletedCount > 0
-                      ? Icons.pending_actions
-                      : Icons.celebration,
-                  color: themeColor(context).tertiary,
-                );
-
-                final String titleText = uncompletedCount > 0
-                    ? "Uncompleted Tasks"
-                    : "You've finished all tasks 🎉";
-
-                final Widget? subtitleText = uncompletedCount > 0
-                    ? Text(
-                        "$uncompletedCount task${uncompletedCount == 1 ? '' : 's'} remaining",
-                        style: TextStyle(fontSize: 16),
-                      )
-                    : null;
-
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ToDoPage(),
-                      ),
-                    );
-                  },
-                  child: Card(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    color: themeColor(context).primary,
-                    child: ListTile(
-                        leading: leadingIcon,
-                        title: Text(
-                          titleText,
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        subtitle: subtitleText),
-                  ),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ToDoPage()),
                 );
               },
+              child: Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                color: themeColor(context).primary,
+                child: ListTile(
+                  leading: leadingIcon,
+                  title: Text(
+                    titleText,
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: subtitleText,
+                ),
+              ),
             ),
             const SizedBox(height: 20),
             const Center(child: Text("Home Page Content Placeholder")),
