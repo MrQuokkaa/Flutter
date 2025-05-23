@@ -1,5 +1,6 @@
 import '../exports/package_exports.dart';
 import '../exports/theme_exports.dart';
+import '../exports/data_exports.dart';
 import '../exports/page_exports.dart';
 
 void main() async {
@@ -18,6 +19,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => themeProvider),
         ChangeNotifierProvider(create: (_) => settingsProvider),
+        ChangeNotifierProvider(create: (_) => FirestoreDataBase()),
       ],
       child: const MainApp(),
     ),

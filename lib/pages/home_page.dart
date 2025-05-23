@@ -13,19 +13,20 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final Functions f = Functions();
   late DayWatcher _dayWatcher;
 
-  List<List<dynamic>> todayTasks = [];
+  int taskCount = 0;
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadTodayTasks();
+    
+    _loadTodayTaskCount();
+
     _dayWatcher = DayWatcher(onDayChanged: (newDay) {
-      _loadTasksForDate(newDay);
+      _loadTaskCountForDate(newDay);
     });
   }
 
@@ -35,88 +36,58 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  Future<void> _loadTodayTasks() async {
-    final now = DateTime.now();
-    await _loadTasksForDate(now);
+  Future<void> _loadTodayTaskCount() async {
+    await _loadTaskCountForDate(DateTime.now());
   }
 
-  Future<void> _loadTasksForDate(DateTime date) async {
-    final uid = _auth.currentUser?.uid;
+  Future<void> _loadTaskCountForDate(DateTime date) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return;
 
-    String _getWeekdayString(int weekday) {
-      const weekdays = [
-        "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
-      ];
-      return weekdays[weekday - 1];
-    }
-
-    final todayKey = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-    final weekday = _getWeekdayString(date.weekday);
-
-    DocumentSnapshot<Map<String, dynamic>> dailyDoc = await _firestore
-        .collection('users')
-        .doc(uid)
-        .collection('dailyTodos')
-        .doc(todayKey)
-        .get();
-
-    if (dailyDoc.exists) {
-      final tasks = dailyDoc.data()?['tasks'];
-      if (tasks is List) {
-        setState(() {
-          todayTasks = List<List<dynamic>>.from(
-            tasks.map((t) => [t['name'], t['completed']]),
-          );
-        });
-        return;
-      }
-    }
-
-    final defaultDoc = await _firestore
+    final key = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    final doc = await FirebaseFirestore.instance
       .collection('users')
       .doc(uid)
-      .collection('defaultTodos')
-      .doc(weekday)
+      .collection('todos')
+      .doc(key)
       .get();
 
-    if (dailyDoc.exists) {
-      final tasks = dailyDoc.data()?['tasks'];
-      if (tasks is List) {
-        setState(() {
-          todayTasks = List<List<dynamic>>.from(
-            tasks.map((t) => [t['name'], t['completed']]),
-          );
-        });
-      } else {
-        setState(() {
-          todayTasks = [];
-        });
-      }
+    if (!mounted) return;
+
+    if (doc.exists && doc.data()?['items'] != null) {
+      final items = doc.data()!['items'] as List;
+      setState (() {
+        taskCount = items.length;
+        isLoading = false;
+      });
+    } else {
+      setState(() {
+        taskCount = 0;
+        isLoading = false;
+      });
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final int uncompletedCount = todayTasks.where((task) => task[1] == false).length;
 
+    final int uncompletedCount = taskCount;
     final Icon leadingIcon = Icon(
       uncompletedCount > 0 ? Icons.pending_actions : Icons.celebration,
       color: themeColor(context).tertiary,
     );
 
     final String titleText = uncompletedCount > 0
-      ? "Uncompleted Tasks"
-      : "You've finished all tasks 🎉";
+        ? "Uncompleted Tasks"
+        : "You've finished all tasks 🎉";
 
     final Widget? subtitleText = uncompletedCount > 0
-      ? Text(
-          "$uncompletedCount task${uncompletedCount == 1 ? '' : 's'} remaining",
-          style: TextStyle(fontSize: 16),
-        )
-      : null;
-
+        ? Text(
+            "$uncompletedCount task${uncompletedCount == 1 ? '' : 's'} remaining",
+            style: TextStyle(fontSize: 16),
+          )
+        : null;
 
     return Scaffold(
       appBar: AppBar(
@@ -143,6 +114,7 @@ class _HomePageState extends State<HomePage> {
                   context,
                   MaterialPageRoute(builder: (context) => ToDoPage()),
                 );
+                _loadTodayTaskCount();
               },
               child: Card(
                 elevation: 4,
