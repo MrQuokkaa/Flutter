@@ -75,9 +75,10 @@ class _SettingsPageState extends State<SettingsPage> {
                           child: Text(day),
                         );
                       }).toList(),
-                      onChanged: (value) {
+                      onChanged: (value) async {
                         if (value == null || value == 'Select day') return;
                         setState(() => selectedDay = value);
+                        await Future.delayed(Duration(milliseconds:500));
                         Navigator.push(
                           context,
                           MaterialPageRoute(

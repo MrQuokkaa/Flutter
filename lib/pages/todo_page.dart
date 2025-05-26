@@ -40,6 +40,7 @@ class _ToDoState extends State<ToDoPage> {
 
   @override
   void dispose() {
+    db.updateDataForDate(selectedDate);
     _controller.dispose();
     _dayWatcher.dispose();
     super.dispose();
@@ -75,7 +76,7 @@ class _ToDoState extends State<ToDoPage> {
   Widget build(BuildContext context) {
     return Consumer<FirestoreDataBase>(
       builder: (context, db, _) {
-        final tasks = db.toDoListCopy;
+        final tasks = db.getTasksForDate(selectedDate);
 
         return Scaffold(
           appBar: AppBar(

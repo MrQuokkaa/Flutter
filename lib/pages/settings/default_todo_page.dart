@@ -19,7 +19,11 @@ class _DefaultTodoPageState extends State<DefaultTodoPage> {
   @override
   void initState() {
     super.initState();
-    _loadDefaultDay();
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _loadDefaultDay();
+      setState(() {});
+    });
   }
 
   @override
@@ -42,14 +46,13 @@ class _DefaultTodoPageState extends State<DefaultTodoPage> {
     if (doc.exists) {
       final data = doc.data();
       if (data != null && data['tasks'] is List) {
-        setState(() {
-          toDoList = List<List<dynamic>>.from(
-            data['tasks'].map((task) => [task['name'], task['completed']]),
-          );
-        });
+        toDoList = List<List<dynamic>>.from(
+          data['tasks'].map((task) => [task['name'], task['completed']]),
+        );
       }
     }
   }
+  
 
   Future<void> _save() async {
     final uid = _auth.currentUser?.uid;
