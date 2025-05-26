@@ -1,7 +1,7 @@
 import '../exports/package_exports.dart';
 
 class FirestoreDataBase with ChangeNotifier{
-  List<List<dynamic>> toDoList = [];
+  Map<String, List<List<dynamic>>> _tasksByDate = {};
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -14,11 +14,16 @@ class FirestoreDataBase with ChangeNotifier{
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
-  List<List<dynamic>> get toDoListCopy =>
-    List.from(toDoList.map((e) => [...e]));
+  List<List<dynamic>> getTasksForDate(DateTime date) {
+    final key = getKeyForDate(date);
+    return _tasksByDate[key] ?? [];
+  }
+  
+  List<List<dynamic>> get todayTasks => getTasksForDate(DateTime.now());
 
   Future<void> loadDataForDate(DateTime date) async {
     String key = getKeyForDate(date);
+
     DocumentSnapshot snapshot = await _firestore
       .collection('users')
       .doc(userId)
@@ -26,8 +31,10 @@ class FirestoreDataBase with ChangeNotifier{
       .doc(key)
       .get();
 
+    List<List<dynamic>> tasksForDate;
+
     if (snapshot.exists && snapshot.data() != null && (snapshot.data()! as Map).containsKey('items')) {
-      toDoList = (snapshot['items'] as List).map((item) => [item['name'], item['completed']]).toList();
+      tasksForDate = (snapshot['items'] as List).map((item) => [item['name'], item['completed']]).toList();
     } else {
       String weekday = DateFormat('EEEE').format(date);
       DocumentSnapshot defaultSnapshot = await _firestore
@@ -40,23 +47,25 @@ class FirestoreDataBase with ChangeNotifier{
       if (defaultSnapshot.exists && 
        defaultSnapshot.data() != null &&
        (defaultSnapshot.data()! as Map).containsKey('tasks')) {
-          toDoList = List<List<dynamic>>.from(
+          tasksForDate = List<List<dynamic>>.from(
             (defaultSnapshot['tasks'] as List).map(
               (task) => [task['name'], task['completed']],
             ),
           );
       } else {
-        toDoList = [];
+        tasksForDate = [];
       }
     }
 
+    _tasksByDate[key] = tasksForDate;
     notifyListeners();
   }
 
   Future <void> updateDataForDate(DateTime date) async {
     String key = getKeyForDate(date);
+    final tasks = _tasksByDate[key] ?? [];
 
-    List<Map<String, dynamic>> mappedList = toDoList.map((item) => {
+    List<Map<String, dynamic>> mappedList = tasks.map((item) => {
       'name': item[0],
       'completed': item[1],
     }).toList();
@@ -71,23 +80,44 @@ class FirestoreDataBase with ChangeNotifier{
   }
 
   Future<void> addTask(String taskName, DateTime date) async {
-    toDoList.add([taskName, false]);
-    toDoList = List.from(toDoList);
+    final key = getKeyForDate(date);
+    final tasks = _tasksByDate[key] ?? [];
+    tasks.add([taskName, false]);
+    _tasksByDate[key] = List.from(tasks);
     await updateDataForDate(date);
     notifyListeners();
   }
 
   Future<void> deleteTask(int index, DateTime date) async {
-    toDoList.removeAt(index);
-    toDoList = List.from(toDoList);
-    await updateDataForDate(date);
-    notifyListeners();
+    final key = getKeyForDate(date);
+    final tasks = _tasksByDate[key] ?? [];
+    if (index >= 0 && index < tasks.length) {
+      tasks.removeAt(index);
+      _tasksByDate[key] = List.from(tasks);
+      await updateDataForDate(date);
+      notifyListeners();
+    }
   }
 
   Future<void> completeTask(int index, DateTime date) async {
-    toDoList[index][1] = !toDoList[index][1];
-    toDoList = List.from(toDoList);
-    await updateDataForDate(date);
+    final key = getKeyForDate(date);
+    final tasks = _tasksByDate[key] ?? [];
+    if (index >= 0 && index < tasks.length) {
+      final updatedTasks = tasks
+        .asMap()
+        .entries
+        .map((entry) => entry.key == index
+          ? [entry.value[0], !(entry.value[1] as bool)]
+          : [...entry.value])
+        .toList();
+      _tasksByDate[key] = updatedTasks;
+      await updateDataForDate(date);
+      await loadDataForDate(date);
+    }
+  }
+    
+  Future<void> updateToday(DateTime newDay) async {
+    await loadDataForDate(newDay);
     notifyListeners();
   }  
 }

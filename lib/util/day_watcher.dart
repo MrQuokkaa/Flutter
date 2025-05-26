@@ -18,6 +18,8 @@ class DayWatcher {
         : DateTime(now.year, now.month, now.day);
   }
 
+  DateTime getLogicalDate(DateTime now) => _getLogicalDate(now);
+
   void _startListening() {
     _timer = Timer.periodic(const Duration(minutes: 1), (_) {
       final currentLogicalDay = _getLogicalDate(DateTime.now());

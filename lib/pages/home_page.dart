@@ -22,11 +22,9 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    
-    _loadTodayTaskCount();
 
     _dayWatcher = DayWatcher(onDayChanged: (newDay) {
-      _loadTaskCountForDate(newDay);
+      Provider.of<FirestoreDataBase>(context, listen: false).updateToday(newDay);
     });
   }
 
@@ -36,43 +34,14 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  Future<void> _loadTodayTaskCount() async {
-    await _loadTaskCountForDate(DateTime.now());
-  }
-
-  Future<void> _loadTaskCountForDate(DateTime date) async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) return;
-
-    final key = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-    final doc = await FirebaseFirestore.instance
-      .collection('users')
-      .doc(uid)
-      .collection('todos')
-      .doc(key)
-      .get();
-
-    if (!mounted) return;
-
-    if (doc.exists && doc.data()?['items'] != null) {
-      final items = doc.data()!['items'] as List;
-      setState (() {
-        taskCount = items.length;
-        isLoading = false;
-      });
-    } else {
-      setState(() {
-        taskCount = 0;
-        isLoading = false;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final db = Provider.of<FirestoreDataBase>(context);
 
-    final int uncompletedCount = taskCount;
+    final todayTasks = db.todayTasks;
+    final int uncompletedCount = db.todayTasks.where((task) => task[1] == false).length;
+
     final Icon leadingIcon = Icon(
       uncompletedCount > 0 ? Icons.pending_actions : Icons.celebration,
       color: themeColor(context).tertiary,
@@ -109,12 +78,18 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             GestureDetector(
-              onTap: () {
-                Navigator.push(
+              onTap: () async {
+                final db = Provider.of<FirestoreDataBase>(context, listen: false);
+                final logicalToday = _dayWatcher.getLogicalDate(DateTime.now());
+
+                await db.loadDataForDate(logicalToday);
+
+                if (!mounted) return;
+                
+                await Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => ToDoPage()),
                 );
-                _loadTodayTaskCount();
               },
               child: Card(
                 elevation: 4,
