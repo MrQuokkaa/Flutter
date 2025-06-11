@@ -145,12 +145,14 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                     );
                   }).toList(),
-                  onChanged: (value) {
+                  onChanged: (value) async {
+                    print('[Settings] Dropdown changed to: $value');
                     if (value == null) return;
                     setState(() => selectedTheme = value);
 
                     final brightness = themeProvider.brightness;
-                    themeProvider.setTheme(value);
+                    await themeProvider.setTheme(value, brightness: brightness);
+                    print('[Settings] Theme updated and saved for user');
                   },
                 ),
               ],
