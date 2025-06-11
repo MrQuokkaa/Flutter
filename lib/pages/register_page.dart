@@ -63,6 +63,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 
                 try {
                   final user = await f.register(name, email, password);
+                  print('[Register] User succesfully registered, redirecing..');
                   if (user != null && context.mounted) {
                     Navigator.pushReplacement(
                       context,

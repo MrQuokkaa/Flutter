@@ -19,7 +19,10 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
+      appBar: AppBar(
+        title: const Text('Login'),
+        automaticallyImplyLeading: false,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -56,11 +59,14 @@ class _LoginPageState extends State<LoginPage> {
                   if (user != null && context.mounted) {
                     final user = FirebaseAuth.instance.currentUser;
                     final name = user?.displayName ?? user?.email ?? 'User';
+                    final themeProvider =
+                        Provider.of<ThemeProvider>(context, listen: false);
+                    await themeProvider.loadFromFirestore();
+                    print('[Login] Theme loaded, User is being logged in..');
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            MainPage(userName: name),
+                        builder: (context) => MainPage(userName: name),
                       ),
                     );
                   }

@@ -1,5 +1,6 @@
 import '../exports/package_exports.dart';
 import '../exports/theme_exports.dart';
+import '../exports/page_exports.dart';
 
 class Functions {
   String dateDay = DateFormat('EEEE').format(DateTime.now());
@@ -61,20 +62,34 @@ class Functions {
   }
 
   Future<User?> register(String name, String email, String password) async {
+    print('[Register] User is being registered..');
     try {
       final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
       await userCredential.user!.updateDisplayName(name);
+      print('[Register] User succesfully registered, redirecting..');
       return userCredential.user;
     } on FirebaseAuthException catch (e) {
-      throw Exception(e.message ?? 'Registration failed');
+      throw Exception(e.message ?? '[Register] User registration failed');
     }
   }
 
-  Future<void> logout() async {
+  Future<void> logout(BuildContext context) async {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+
+    themeProvider.applyFallbackTheme();
+
+    HomePage.resetCard();
+
+    await Future.delayed(Duration.zero);
     await FirebaseAuth.instance.signOut();
+    print('[Logout] User logged out, redirecting..');
+
+    if (context.mounted) {
+      Navigator.pushReplacementNamed(context, '/login');
+    }
   }
 
   bool isLoggedIn() {

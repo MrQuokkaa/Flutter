@@ -27,12 +27,7 @@ class ProfilePage extends StatelessWidget {
               const Text("Profile Page Content Placeholder"),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () async {
-                  await f.logout();
-                  if (context.mounted) {
-                    Navigator.pushReplacementNamed(context, '/login');
-                  }
-                },
+                onPressed: () => f.logout(context),
                 child: const Text('Logout'),
               ),
             ],
