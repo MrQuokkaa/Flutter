@@ -1,6 +1,7 @@
 import '../exports/package_exports.dart';
 import '../exports/theme_exports.dart';
 import '../exports/page_exports.dart';
+import '../exports/util_exports.dart';
 
 class Functions {
   String dateDay = DateFormat('EEEE').format(DateTime.now());
@@ -46,7 +47,8 @@ class Functions {
 
   Future<User?> login(String email, String password) async {
     try {
-      final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      final userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -62,9 +64,10 @@ class Functions {
   }
 
   Future<User?> register(String name, String email, String password) async {
-    print('[Register] User is being registered..');
+    debugLog('[Register] User is being registered..');
     try {
-      final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      final userCredential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -79,13 +82,12 @@ class Functions {
   Future<void> logout(BuildContext context) async {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
 
-    themeProvider.applyFallbackTheme();
+    await themeProvider.applyFallbackTheme();
 
     HomePage.resetCard();
 
-    await Future.delayed(Duration.zero);
     await FirebaseAuth.instance.signOut();
-    print('[Logout] User logged out, redirecting..');
+    debugLog('[Logout] User logged out, redirecting..');
 
     if (context.mounted) {
       Navigator.pushReplacementNamed(context, '/login');
@@ -96,5 +98,3 @@ class Functions {
     return FirebaseAuth.instance.currentUser != null;
   }
 }
-
-

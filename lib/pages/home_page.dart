@@ -10,7 +10,7 @@ class HomePage extends StatefulWidget {
 
   static void resetCard() {
     _HomePageState._cardVisible = false;
-    print('[Home] Changed card visibility');
+    debugLog('[Logout] Changed card visibility');
   }
 
   @override
@@ -46,9 +46,9 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           _cardVisible = true;
         });
-        print('[Home] Card loaded, fading in..');
+        debugLog('[Home] Card loaded, fading in..');
       } else {
-        print('[Home] Card is visible');
+        debugLog('[Home] Card is visible');
       }
     });
   }
@@ -116,11 +116,12 @@ class _HomePageState extends State<HomePage> {
 
                         if (db.todayTasks.isEmpty) {
                           await db.loadDataForDate(logicalToday);
-                          print('[Home] Task-list was empty, loaded data');
-                        };
+                          debugLog('[Home] Task-list was empty, loaded data');
+                        }
+                        ;
 
                         if (!mounted) return;
-                        print('[Home] Redirecting to ToDo Page..');
+                        debugLog('[Home] Redirecting to ToDo Page..');
 
                         await Navigator.push(
                           context,

@@ -1,6 +1,7 @@
 import '../exports/package_exports.dart';
 import '../exports/theme_exports.dart';
 import '../exports/page_exports.dart';
+import '../exports/util_exports.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -23,13 +24,15 @@ class _SettingsPageState extends State<SettingsPage> {
   String selectedTheme = 'Blue';
   String? selectedDay = 'Select day';
 
-  List<String> hours = List.generate(24, (i) => i.toString().padLeft(2, '0') + ":00");
+  List<String> hours =
+      List.generate(24, (i) => i.toString().padLeft(2, '0') + ":00");
   String selectedHour = '00:00';
 
   @override
   void initState() {
     super.initState();
-    selectedTheme = Provider.of<ThemeProvider>(context, listen: false).themeName;
+    selectedTheme =
+        Provider.of<ThemeProvider>(context, listen: false).themeName;
   }
 
   @override
@@ -41,10 +44,10 @@ class _SettingsPageState extends State<SettingsPage> {
 
     final sortedPresets = presets.toList()
       ..sort((a, b) => a.name == selectedTheme
-        ? -1
-        : b.name == selectedTheme
-            ? 1
-            : 0);
+          ? -1
+          : b.name == selectedTheme
+              ? 1
+              : 0);
 
     return Scaffold(
       appBar: AppBar(
@@ -65,8 +68,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text("Change default tasks",
-                      style: TextStyle(fontSize: 16)
-                    ),
+                        style: TextStyle(fontSize: 16)),
                     DropdownButton<String>(
                       value: selectedDay,
                       items: ['Select day', ...weekdays].map((day) {
@@ -78,11 +80,11 @@ class _SettingsPageState extends State<SettingsPage> {
                       onChanged: (value) async {
                         if (value == null || value == 'Select day') return;
                         setState(() => selectedDay = value);
-                        await Future.delayed(Duration(milliseconds:500));
+                        await Future.delayed(Duration(milliseconds: 500));
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                          builder: (_) => DefaultTodoPage(weekday: value),
+                            builder: (_) => DefaultTodoPage(weekday: value),
                           ),
                         ).then((_) {
                           setState(() => selectedDay = 'Select day');
@@ -146,13 +148,13 @@ class _SettingsPageState extends State<SettingsPage> {
                     );
                   }).toList(),
                   onChanged: (value) async {
-                    print('[Settings] Dropdown changed to: $value');
+                    debugLog('[Settings] Dropdown changed to: $value');
                     if (value == null) return;
                     setState(() => selectedTheme = value);
 
                     final brightness = themeProvider.brightness;
                     await themeProvider.setTheme(value, brightness: brightness);
-                    print('[Settings] Theme updated and saved for user');
+                    debugLog('[Settings] Theme updated and saved for user');
                   },
                 ),
               ],
@@ -164,9 +166,7 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Container(
               height: 50,
               color: themeColor(context).primary,
-              child: Center(
-                child: Text('Current Primary Color')
-              ),
+              child: Center(child: Text('Current Primary Color')),
             ),
           ),
           const Divider(),
@@ -175,9 +175,7 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Container(
               height: 50,
               color: themeColor(context).secondary,
-              child: Center(
-                child: Text('Current Secondary Color')
-              ),
+              child: Center(child: Text('Current Secondary Color')),
             ),
           ),
           const Divider(),
@@ -186,9 +184,7 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Container(
               height: 50,
               color: themeColor(context).tertiary,
-              child: Center(
-                child: Text('Current Tertiary Color')
-              ),
+              child: Center(child: Text('Current Tertiary Color')),
             ),
           ),
         ],
