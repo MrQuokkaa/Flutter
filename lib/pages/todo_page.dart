@@ -4,7 +4,6 @@ import '../exports/theme_exports.dart';
 import '../exports/data_exports.dart';
 import '../exports/util_exports.dart';
 
-
 class ToDoPage extends StatefulWidget {
   const ToDoPage({super.key});
 
@@ -25,7 +24,7 @@ class _ToDoState extends State<ToDoPage> {
   void initState() {
     super.initState();
     db = Provider.of<FirestoreDataBase>(context, listen: false);
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await db.loadDataForDate(selectedDate);
       setState(() {});

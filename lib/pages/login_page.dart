@@ -58,11 +58,12 @@ class _LoginPageState extends State<LoginPage> {
                   );
                   if (user != null && context.mounted) {
                     final user = FirebaseAuth.instance.currentUser;
+                    debugLog('[Login] User authenticated');
                     final name = user?.displayName ?? user?.email ?? 'User';
                     final themeProvider =
                         Provider.of<ThemeProvider>(context, listen: false);
                     await themeProvider.loadFromFirestore();
-                    print('[Login] Theme loaded, User is being logged in..');
+                    debugLog('[Login] Theme loaded, User is being logged in..');
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
