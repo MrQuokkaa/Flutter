@@ -1,5 +1,4 @@
 import '../exports/package_exports.dart';
-import '../exports/theme_exports.dart';
 import '../exports/util_exports.dart';
 import '../exports/page_exports.dart';
 
@@ -61,6 +60,11 @@ class _RegisterPageState extends State<RegisterPage> {
                 final email = _emailController.text.trim();
                 final password = _passwordController.text.trim();
 
+                if (name.isEmpty) {
+                  setState(() => _error = 'Please enter your name.');
+                  return;
+                }
+
                 try {
                   final user = await f.register(name, email, password);
                   debugLog(
@@ -69,8 +73,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            MainPage(userName: name ?? 'User'),
+                        builder: (context) => MainPage(),
                       ),
                     );
                   }

@@ -1,29 +1,26 @@
 import '../exports/package_exports.dart';
-import '../exports/theme_exports.dart';
 import '../exports/page_exports.dart';
 import '../exports/util_exports.dart';
 
 class MainPage extends StatefulWidget {
-  final String userName;
-  const MainPage({super.key, required this.userName});
+  const MainPage({super.key});
 
   @override
   State<MainPage> createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage> {
-  late List <Widget> pages;
-  
+  late List<Widget> pages;
+
   @override
   void initState() {
     super.initState();
     pages = [
-      HomePage(userName: widget.userName),
+      HomePage(),
       ProfilePage(),
       SettingsPage(),
     ];
   }
-  
 
   Functions f = Functions();
   int currentPage = 0;

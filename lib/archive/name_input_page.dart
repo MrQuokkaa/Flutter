@@ -1,5 +1,4 @@
 import '../exports/package_exports.dart';
-import '../exports/theme_exports.dart';
 import '../exports/util_exports.dart';
 import '../exports/page_exports.dart';
 
@@ -43,8 +42,10 @@ class NameInputPage extends StatelessWidget {
                         builder: (context) => MainPage(userName: name),
                       ),
                     );
-                  };
-                };
+                  }
+                  ;
+                }
+                ;
               },
               child: const Text('Continue'),
             ),
