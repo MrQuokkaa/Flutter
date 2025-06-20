@@ -3,6 +3,8 @@ import '../exports/package_exports.dart';
 class FirestoreDataBase with ChangeNotifier {
   Map<String, List<List<dynamic>>> _tasksByDate = {};
 
+  DateTime? _currentDay;
+
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -131,7 +133,16 @@ class FirestoreDataBase with ChangeNotifier {
   }
 
   Future<void> updateToday(DateTime newDay) async {
-    await loadDataForDate(newDay);
-    notifyListeners();
+    if (_currentDay == null || !_isSameDay(_currentDay!, newDay)) {
+      _currentDay = newDay;
+      await loadDataForDate(newDay);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        notifyListeners();
+      });
+    }
+  }
+
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 }

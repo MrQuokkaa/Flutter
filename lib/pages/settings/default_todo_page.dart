@@ -1,10 +1,12 @@
 import '../../exports/package_exports.dart';
 import '../../exports/theme_exports.dart';
-import '../../exports/data_exports.dart';
 
 class DefaultTodoPage extends StatefulWidget {
   final String weekday;
-  const DefaultTodoPage({required this.weekday, super.key});
+  final List<List<dynamic>> toDoList;
+
+  const DefaultTodoPage(
+      {required this.weekday, required this.toDoList, super.key});
 
   @override
   State<DefaultTodoPage> createState() => _DefaultTodoPageState();
@@ -19,11 +21,7 @@ class _DefaultTodoPageState extends State<DefaultTodoPage> {
   @override
   void initState() {
     super.initState();
-    
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _loadDefaultDay();
-      setState(() {});
-    });
+    toDoList = widget.toDoList;
   }
 
   @override
@@ -32,43 +30,23 @@ class _DefaultTodoPageState extends State<DefaultTodoPage> {
     super.dispose();
   }
 
-  Future<void> _loadDefaultDay() async {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) return;
-
-    final doc = await _firestore
-      .collection('users')
-      .doc(uid)
-      .collection('defaultTodos')
-      .doc(widget.weekday)
-      .get();
-
-    if (doc.exists) {
-      final data = doc.data();
-      if (data != null && data['tasks'] is List) {
-        toDoList = List<List<dynamic>>.from(
-          data['tasks'].map((task) => [task['name'], task['completed']]),
-        );
-      }
-    }
-  }
-  
-
   Future<void> _save() async {
     final uid = _auth.currentUser?.uid;
     if (uid == null) return;
 
-    final tasks = toDoList.map((task) => {
-      'name': task[0],
-      'completed': task[1],
-    }).toList();
+    final tasks = toDoList
+        .map((task) => {
+              'name': task[0],
+              'completed': task[1],
+            })
+        .toList();
 
     await _firestore
-      .collection('users')
-      .doc(uid)
-      .collection('defaultTodos')
-      .doc(widget.weekday)
-      .set({'tasks': tasks});
+        .collection('users')
+        .doc(uid)
+        .collection('defaultTodos')
+        .doc(widget.weekday)
+        .set({'tasks': tasks});
   }
 
   @override
@@ -98,7 +76,7 @@ class _DefaultTodoPageState extends State<DefaultTodoPage> {
                   toDoList.insert(newIndex, item);
                 });
                 await _save();
-                if (mounted) setState (() {});
+                if (mounted) setState(() {});
               },
               children: toDoList.asMap().entries.map((entry) {
                 int index = entry.key;
@@ -117,8 +95,8 @@ class _DefaultTodoPageState extends State<DefaultTodoPage> {
                       children: [
                         ReorderableDragStartListener(
                           index: index,
-                          child:
-                              Icon(Icons.drag_handle, color: themeColor(context).tertiary),
+                          child: Icon(Icons.drag_handle,
+                              color: themeColor(context).tertiary),
                         ),
                         SizedBox(width: 12),
                         Checkbox(
@@ -129,7 +107,8 @@ class _DefaultTodoPageState extends State<DefaultTodoPage> {
                               toDoList[index][1] = !toDoList[index][1];
                             });
                             await _save();
-                            if (mounted) setState (() {});;
+                            if (mounted) setState(() {});
+                            ;
                           },
                         ),
                         Expanded(
@@ -146,7 +125,7 @@ class _DefaultTodoPageState extends State<DefaultTodoPage> {
                               toDoList.removeAt(index);
                             });
                             await _save();
-                            if (mounted) setState (() {});
+                            if (mounted) setState(() {});
                           },
                         ),
                       ],
@@ -176,12 +155,12 @@ class _DefaultTodoPageState extends State<DefaultTodoPage> {
                   ),
                   onPressed: () async {
                     if (_controller.text.trim().isEmpty) return;
-                    setState (() {
+                    setState(() {
                       toDoList.add([_controller.text.trim(), false]);
                       _controller.clear();
                     });
                     await _save();
-                    if (mounted) setState (() {});
+                    if (mounted) setState(() {});
                   },
                   child: Text("Add"),
                 ),

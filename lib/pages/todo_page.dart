@@ -1,11 +1,13 @@
 import 'package:flutter_slidable/flutter_slidable.dart';
 import '../exports/package_exports.dart';
 import '../exports/theme_exports.dart';
+import '../exports/page_exports.dart';
 import '../exports/data_exports.dart';
 import '../exports/util_exports.dart';
 
 class ToDoPage extends StatefulWidget {
-  const ToDoPage({super.key});
+  final DateTime selectedDate;
+  const ToDoPage({super.key, required this.selectedDate});
 
   @override
   State<ToDoPage> createState() => _ToDoState();
@@ -17,24 +19,30 @@ class _ToDoState extends State<ToDoPage> {
   final Functions f = Functions();
   final _controller = TextEditingController();
 
-  DateTime selectedDate = DateTime.now();
+  late DateTime selectedDate;
   late DayWatcher _dayWatcher;
 
   @override
   void initState() {
     super.initState();
     db = Provider.of<FirestoreDataBase>(context, listen: false);
+    final settingsProvider = Provider.of<SettingsProvider>(context, listen: false);
+
+    selectedDate = widget.selectedDate;
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await settingsProvider.loadSettings();
       await db.loadDataForDate(selectedDate);
       setState(() {});
     });
 
-    _dayWatcher = DayWatcher(onDayChanged: (newLogicalDay) async {
-      selectedDate = newLogicalDay;
-      await db.loadDataForDate(selectedDate);
-      setState(() {});
-    });
+    _dayWatcher = DayWatcher(
+      onDayChanged: (newLogicalDay) async {
+        selectedDate = newLogicalDay;
+        await db.loadDataForDate(selectedDate);
+        setState(() {});
+      },
+    );
   }
 
   @override

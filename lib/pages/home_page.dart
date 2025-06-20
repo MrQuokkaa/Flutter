@@ -5,8 +5,7 @@ import '../exports/util_exports.dart';
 import '../exports/data_exports.dart';
 
 class HomePage extends StatefulWidget {
-  final String userName;
-  const HomePage({super.key, required this.userName});
+  const HomePage({super.key});
 
   static void resetCard() {
     _HomePageState._cardVisible = false;
@@ -19,6 +18,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final Functions f = Functions();
+  DateTime get logicalToday => _dayWatcher.getLogicalDate(DateTime.now());
   late DayWatcher _dayWatcher;
 
   int taskCount = 0;
@@ -29,27 +29,34 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
 
-    _dayWatcher = DayWatcher(onDayChanged: (newDay) {
-      Provider.of<FirestoreDataBase>(context, listen: false)
-          .updateToday(newDay);
-    });
+    final db = Provider.of<FirestoreDataBase>(context, listen: false);
+
+    _dayWatcher = DayWatcher(
+      onDayChanged: (newDay) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          db.updateToday(newDay);
+        });
+      },
+    );
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final db = Provider.of<FirestoreDataBase>(context, listen: false);
-      final logicalToday = _dayWatcher.getLogicalDate(DateTime.now());
 
+      await db.updateToday(logicalToday);
       await db.loadDataForDate(logicalToday);
 
       if (!mounted) return;
 
-      if (!_cardVisible) {
-        setState(() {
-          _cardVisible = true;
-        });
-        debugLog('[Home] Card loaded, fading in..');
-      } else {
-        debugLog('[Home] Card is visible');
-      }
+      Future.delayed(Duration.zero, () {
+        if (!_cardVisible) {
+          setState(() {
+            _cardVisible = true;
+          });
+          debugLog('[Home] Card loaded, fading in..');
+        } else {
+          debugLog('[Home] Card is visible');
+        }
+      });
     });
   }
 
@@ -62,10 +69,11 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final db = Provider.of<FirestoreDataBase>(context);
+    final db = Provider.of<FirestoreDataBase>(context, listen: false);
+    final userName = FirebaseAuth.instance.currentUser?.displayName ?? 'User';
 
-    final int uncompletedCount =
-        db.todayTasks.where((task) => task[1] == false).length;
+    final List<List<dynamic>> tasks = db.getTasksForDate(logicalToday);
+    final int uncompletedCount = tasks.where((task) => task[1] == false).length;
 
     final Icon leadingIcon = Icon(
       uncompletedCount > 0 ? Icons.pending_actions : Icons.celebration,
@@ -92,7 +100,7 @@ class _HomePageState extends State<HomePage> {
           children: [
             f.appBarText(context),
             Text(
-              f.getGreeting(widget.userName),
+              f.getGreeting(userName),
               style: textTheme.titleMedium,
             ),
           ],
@@ -114,11 +122,8 @@ class _HomePageState extends State<HomePage> {
                         final logicalToday =
                             _dayWatcher.getLogicalDate(DateTime.now());
 
-                        if (db.todayTasks.isEmpty) {
-                          await db.loadDataForDate(logicalToday);
-                          debugLog('[Home] Task-list was empty, loaded data');
-                        }
-                        ;
+                        await db.loadDataForDate(logicalToday);
+                        debugLog('[Home] Task-list was empty, loaded data');
 
                         if (!mounted) return;
                         debugLog('[Home] Redirecting to ToDo Page..');
@@ -126,7 +131,9 @@ class _HomePageState extends State<HomePage> {
                         await Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const ToDoPage()),
+                            builder: (context) =>
+                                ToDoPage(selectedDate: logicalToday),
+                          ),
                         );
                       },
                       child: Card(

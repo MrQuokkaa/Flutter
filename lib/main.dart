@@ -61,9 +61,8 @@ class MyApp extends StatelessWidget {
             theme: theme.themeData,
             initialRoute: '/',
             routes: {
-              '/': (context) => user != null
-                  ? const MainPageLauncher()
-                  : const LoginPage(),
+              '/': (context) =>
+                  user != null ? const MainPageLauncher() : const LoginPage(),
               '/login': (context) => const LoginPage(),
               '/register': (context) => const RegisterPage(),
               '/settings': (context) => const SettingsPage(),
@@ -80,8 +79,6 @@ class MainPageLauncher extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-    final name = user?.displayName ?? user?.email ?? 'User';
-    return MainPage(userName: name);
+    return MainPage();
   }
 }

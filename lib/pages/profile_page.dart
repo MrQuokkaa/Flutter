@@ -1,7 +1,5 @@
 import '../exports/package_exports.dart';
-import '../exports/theme_exports.dart';
 import '../exports/util_exports.dart';
-import '../exports/page_exports.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -18,6 +16,12 @@ class ProfilePage extends StatelessWidget {
           'Profile',
           style: textTheme.headlineLarge,
         ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () => f.logout(context),
+          ),
+        ],
       ),
       body: Container(
         child: Center(
@@ -25,11 +29,6 @@ class ProfilePage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text("Profile Page Content Placeholder"),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => f.logout(context),
-                child: const Text('Logout'),
-              ),
             ],
           ),
         ),

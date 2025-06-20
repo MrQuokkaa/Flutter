@@ -57,9 +57,7 @@ class _LoginPageState extends State<LoginPage> {
                     _passwordController.text.trim(),
                   );
                   if (user != null && context.mounted) {
-                    final user = FirebaseAuth.instance.currentUser;
                     debugLog('[Login] User authenticated');
-                    final name = user?.displayName ?? user?.email ?? 'User';
                     final themeProvider =
                         Provider.of<ThemeProvider>(context, listen: false);
                     await themeProvider.loadFromFirestore();
@@ -67,7 +65,7 @@ class _LoginPageState extends State<LoginPage> {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => MainPage(userName: name),
+                        builder: (context) => MainPage(),
                       ),
                     );
                   }

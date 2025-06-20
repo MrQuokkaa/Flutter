@@ -6,11 +6,6 @@ import '../exports/util_exports.dart';
 class Functions {
   String dateDay = DateFormat('EEEE').format(DateTime.now());
 
-  Future<String> getUserName() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('username') ?? '';
-  }
-
   String getGreeting(String name) {
     final hour = DateTime.now().hour;
     String baseGreeting;
@@ -58,11 +53,6 @@ class Functions {
     }
   }
 
-  Future<void> saveUserName(String name) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('username', name);
-  }
-
   Future<User?> register(String name, String email, String password) async {
     debugLog('[Register] User is being registered..');
     try {
@@ -72,7 +62,7 @@ class Functions {
         password: password,
       );
       await userCredential.user!.updateDisplayName(name);
-      print('[Register] User succesfully registered, redirecting..');
+      debugLog('[Register] User succesfully registered, redirecting..');
       return userCredential.user;
     } on FirebaseAuthException catch (e) {
       throw Exception(e.message ?? '[Register] User registration failed');

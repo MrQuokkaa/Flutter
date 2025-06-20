@@ -39,8 +39,6 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     final textTheme = Theme.of(context).textTheme;
-    final settingsProvider = Provider.of<SettingsProvider>(context);
-    String selectedHour = settingsProvider.dayStartHour;
 
     final sortedPresets = presets.toList()
       ..sort((a, b) => a.name == selectedTheme
@@ -56,6 +54,18 @@ class _SettingsPageState extends State<SettingsPage> {
           "Settings",
           style: textTheme.headlineLarge,
         ),
+        actions: [
+          if (debugMode)
+            IconButton(
+              icon: const Icon(Icons.bug_report),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => DebugPage()),
+                );
+              },
+            ),
+        ],
       ),
       body: ListView(
         children: [
@@ -80,11 +90,35 @@ class _SettingsPageState extends State<SettingsPage> {
                       onChanged: (value) async {
                         if (value == null || value == 'Select day') return;
                         setState(() => selectedDay = value);
-                        await Future.delayed(Duration(milliseconds: 500));
+
+                        final uid = FirebaseAuth.instance.currentUser?.uid;
+                        if (uid == null) return;
+
+                        final doc = await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(uid)
+                            .collection('defaultTodos')
+                            .doc(value)
+                            .get();
+
+                        List<List<dynamic>> tasks = [];
+                        if (doc.exists) {
+                          final data = doc.data();
+                          if (data != null && data['tasks'] is List) {
+                            tasks = List<List<dynamic>>.from(
+                              data['tasks'].map(
+                                  (task) => [task['name'], task['completed']]),
+                            );
+                          }
+                        }
+
+                        await Future.delayed(Duration(milliseconds: 50));
+
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => DefaultTodoPage(weekday: value),
+                            builder: (_) => DefaultTodoPage(
+                                weekday: value, toDoList: tasks),
                           ),
                         ).then((_) {
                           setState(() => selectedDay = 'Select day');
@@ -94,25 +128,6 @@ class _SettingsPageState extends State<SettingsPage> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text("Day starts at", style: TextStyle(fontSize: 16)),
-                    DropdownButton<String>(
-                      value: selectedHour,
-                      items: hours.map((hour) {
-                        return DropdownMenuItem<String>(
-                          value: hour,
-                          child: Text(hour),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        if (value == null) return;
-                        settingsProvider.setDayStartHour(value);
-                      },
-                    ),
-                  ],
-                ),
               ],
             ),
           ),
@@ -158,33 +173,6 @@ class _SettingsPageState extends State<SettingsPage> {
                   },
                 ),
               ],
-            ),
-          ),
-          const Divider(),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Container(
-              height: 50,
-              color: themeColor(context).primary,
-              child: Center(child: Text('Current Primary Color')),
-            ),
-          ),
-          const Divider(),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Container(
-              height: 50,
-              color: themeColor(context).secondary,
-              child: Center(child: Text('Current Secondary Color')),
-            ),
-          ),
-          const Divider(),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Container(
-              height: 50,
-              color: themeColor(context).tertiary,
-              child: Center(child: Text('Current Tertiary Color')),
             ),
           ),
         ],
