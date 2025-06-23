@@ -29,6 +29,8 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
 
+    Future.microtask(() => Provider.of<ProfileProvider>(context, listen: false).loadProfileImage());
+
     final db = Provider.of<FirestoreDataBase>(context, listen: false);
 
     _dayWatcher = DayWatcher(

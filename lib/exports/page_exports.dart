@@ -1,6 +1,7 @@
 export '../pages/settings/settings_provider.dart';
 export '../pages/settings/default_todo_page.dart';
 export '../pages/settings/debug_page.dart';
+export '../pages/profile/profile_provider.dart';
 export '../pages/home_page.dart';
 export '../pages/login_page.dart';
 export '../pages/main_page.dart';
