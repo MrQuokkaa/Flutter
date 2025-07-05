@@ -9,7 +9,7 @@ class HomePage extends StatefulWidget {
 
   static void resetCard() {
     _HomePageState._cardVisible = false;
-    debugLog('[Logout] Changed card visibility');
+    debugLog('[Logout] Unloaded card');
   }
 
   @override
@@ -28,8 +28,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-
-    Future.microtask(() => Provider.of<ProfileProvider>(context, listen: false).loadProfileImage());
 
     final db = Provider.of<FirestoreDataBase>(context, listen: false);
 

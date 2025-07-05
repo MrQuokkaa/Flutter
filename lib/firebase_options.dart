@@ -21,25 +21,13 @@ class DefaultFirebaseOptions {
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for android - '
-          'try to add using FlutLab Firebase Configuration',
-        );
+        return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for iOS - '
-          'try to add using FlutLab Firebase Configuration',
-        );
+        return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'it not supported by FlutLab yet, but you can add it manually',
-        );
+        return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'it not supported by FlutLab yet, but you can add it manually',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -52,6 +40,50 @@ class DefaultFirebaseOptions {
     }
   }
 
-  
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyCGGtyURAiOiaQZO0m_T8CVR_XRr-4MI0A',
+    appId: '1:235289225846:web:a3e5c7e9327d28982c4d57',
+    messagingSenderId: '235289225846',
+    projectId: 'tasklist-821cd',
+    authDomain: 'tasklist-821cd.firebaseapp.com',
+    storageBucket: 'tasklist-821cd.firebasestorage.app',
+    measurementId: 'G-2Y7SH1E6KV',
   );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyCXB8f0wFfikERqKN7lI2Zmrzk_ilibIps',
+    appId: '1:235289225846:ios:3db7c23faf395fcf2c4d57',
+    messagingSenderId: '235289225846',
+    projectId: 'tasklist-821cd',
+    storageBucket: 'tasklist-821cd.firebasestorage.app',
+    iosBundleId: 'com.example.daily',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyCXB8f0wFfikERqKN7lI2Zmrzk_ilibIps',
+    appId: '1:235289225846:ios:3db7c23faf395fcf2c4d57',
+    messagingSenderId: '235289225846',
+    projectId: 'tasklist-821cd',
+    storageBucket: 'tasklist-821cd.firebasestorage.app',
+    iosBundleId: 'com.example.daily',
+  );
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyAK6I_3JSSzYFiU96d-nKT3dx3uCkVj4Do',
+    appId: '1:235289225846:android:f04368b1237866502c4d57',
+    messagingSenderId: '235289225846',
+    projectId: 'tasklist-821cd',
+    storageBucket: 'tasklist-821cd.firebasestorage.app',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyCGGtyURAiOiaQZO0m_T8CVR_XRr-4MI0A',
+    appId: '1:235289225846:web:3b7985c73d2355642c4d57',
+    messagingSenderId: '235289225846',
+    projectId: 'tasklist-821cd',
+    authDomain: 'tasklist-821cd.firebaseapp.com',
+    storageBucket: 'tasklist-821cd.firebasestorage.app',
+    measurementId: 'G-2ZW74PHM9X',
+  );
+
 }

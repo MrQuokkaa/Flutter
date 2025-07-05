@@ -1,5 +1,5 @@
 import '../exports/package_exports.dart';
-import '../exports/theme_exports.dart';
+import '../exports/util_exports.dart';
 import '../exports/data_exports.dart';
 import '../exports/page_exports.dart';
 
@@ -9,61 +9,39 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  final settingsProvider = SettingsProvider();
-  await settingsProvider.loadSettings();
-
-  final user = FirebaseAuth.instance.currentUser;
-
-  final themeProvider = user != null
-      ? await ThemeProvider.loadTheme()
-      : await _loadFallbackTheme();
+  final userProvider = UserProvider();
 
   runApp(MyApp(
-    settingsProvider: settingsProvider,
-    themeProvider: themeProvider,
-    user: user,
+    userProvider: userProvider,
   ));
 }
 
-Future<ThemeProvider> _loadFallbackTheme() async {
-  final fallbackPreset = getThemePreset('Purple');
-  final fallbackTheme = buildCustomTheme(
-    preset: fallbackPreset,
-    brightness: Brightness.light,
-  );
-  return ThemeProvider(fallbackTheme, 'Purple', Brightness.light);
-}
-
 class MyApp extends StatelessWidget {
-  final SettingsProvider settingsProvider;
-  final ThemeProvider themeProvider;
-  final User? user;
+  final UserProvider userProvider;
 
   const MyApp({
     super.key,
-    required this.settingsProvider,
-    required this.themeProvider,
-    required this.user,
+    required this.userProvider,
   });
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => themeProvider),
-        ChangeNotifierProvider(create: (_) => settingsProvider),
-        ChangeNotifierProvider(create: (_) => ProfileProvider()),
+        ChangeNotifierProvider.value(value: userProvider),
         ChangeNotifierProvider(create: (_) => FirestoreDataBase()),
       ],
-      child: Consumer<ThemeProvider>(
+      child: Consumer<UserProvider>(
         builder: (context, theme, _) {
+          final user = FirebaseAuth.instance.currentUser;
+
           return MaterialApp(
             debugShowCheckedModeBanner: false,
             theme: theme.themeData,
             initialRoute: '/',
             routes: {
               '/': (context) =>
-                  user != null ? const MainPageLauncher() : const LoginPage(),
+                  user != null ? const AutoLogin() : const LoginPage(),
               '/login': (context) => const LoginPage(),
               '/register': (context) => const RegisterPage(),
               '/settings': (context) => const SettingsPage(),
@@ -75,11 +53,45 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MainPageLauncher extends StatelessWidget {
-  const MainPageLauncher({super.key});
+class AutoLogin extends StatefulWidget {
+  const AutoLogin({super.key});
 
   @override
+  State<AutoLogin> createState() => _AutoLoginState();
+}
+
+class _AutoLoginState extends State<AutoLogin> {
+  bool _isReady = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeUser();
+  }
+
+  Future<void> _initializeUser() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    
+    while (!userProvider.hasLoadedData) {
+      await Future.delayed(const Duration(milliseconds: 50));
+    }
+
+    final imageUrl = userProvider.imageUrl;
+    if (imageUrl.isNotEmpty) {
+      await precacheImage(CachedNetworkImageProvider(imageUrl), context);
+    } else {
+      await precacheImage(const AssetImage('assets/images/default_avatar.png'), context);         debugLog('[Login] Default avatar cached..');
+    }
+
+    debugLog('[AutoLogin] Profile image cached..');
+    setState(() => _isReady = true);
+  }
+  
+  @override
   Widget build(BuildContext context) {
-    return MainPage();
+    return _isReady
+      ? MainPage()
+      : const Scaffold(body: SizedBox.shrink());
   }
 }
+  

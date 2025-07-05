@@ -17,14 +17,10 @@ ThemeData buildCustomTheme({
     onSecondary: secondaryScheme.onPrimary,
     tertiary: tertiaryScheme.primary,
     onTertiary: tertiaryScheme.onPrimary,
-    background: brightness == Brightness.dark
+    surface: brightness == Brightness.dark
         ? const Color(0xFFFFFDFA)
         : const Color(0xFFFFFDFA),
-    onBackground: brightness == Brightness.dark ? Colors.white : Colors.black,
-    surface: brightness == Brightness.dark
-        ? const Color(0xFF1E1E1E)
-        : const Color(0xFFF7F7F7),
-    onSurface: brightness == Brightness.dark ? Colors.white70 : Colors.black87,
+    onSurface: brightness == Brightness.dark ? Colors.white : Colors.black,
   );
 
   final textTheme = TextTheme(
@@ -32,13 +28,13 @@ ThemeData buildCustomTheme({
       fontFamily: 'Roboto Slab',
       fontSize: 24,
       fontWeight: FontWeight.w300,
-      color: scheme.onBackground,
+      color: scheme.onSurface,
     ),
     titleMedium: TextStyle(
       fontFamily: 'Poppins',
       fontSize: 18,
       fontWeight: FontWeight.w300,
-      color: scheme.onBackground,
+      color: scheme.onSurface,
     ),
     bodyMedium: TextStyle(
       fontFamily: 'Poppins',
@@ -55,23 +51,23 @@ ThemeData buildCustomTheme({
   return ThemeData(
     useMaterial3: true,
     colorScheme: scheme,
-    scaffoldBackgroundColor: scheme.background,
+    scaffoldBackgroundColor: scheme.surface,
     textTheme: textTheme,
     appBarTheme: AppBarTheme(
-      backgroundColor: scheme.background,
+      backgroundColor: scheme.surface,
     ),
     navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: scheme.background,
+      backgroundColor: scheme.surface,
       indicatorColor: preset.tertiary.withOpacity(0.2),
-      iconTheme: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.selected)) {
+      iconTheme: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
           return IconThemeData(color: preset.tertiary);
         }
         return IconThemeData(color: Colors.grey);
       }),
-      labelTextStyle: MaterialStateProperty.resolveWith((states) {
+      labelTextStyle: WidgetStateProperty.resolveWith((states) {
         return TextStyle(
-          color: states.contains(MaterialState.selected)
+          color: states.contains(WidgetState.selected)
               ? preset.tertiary
               : scheme.onSurface.withOpacity(0.6),
         );
@@ -88,7 +84,7 @@ ThemePreset getThemePreset(String name) {
 }
 
 ThemePreset themeColor(BuildContext context) {
-  final selectedTheme = Provider.of<ThemeProvider>(context).themeName;
+  final selectedTheme = Provider.of<UserProvider>(context).themeName;
   return presets.firstWhere(
     (preset) => preset.name == selectedTheme,
     orElse: () => presets.first,

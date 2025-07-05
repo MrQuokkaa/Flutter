@@ -1,4 +1,5 @@
 import '../exports/package_exports.dart';
+import '../exports/widgets_exports.dart';
 import '../exports/page_exports.dart';
 import '../exports/util_exports.dart';
 import 'dart:ui';
@@ -12,9 +13,7 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final Functions f = Functions();
-  File? _profileImage;
   String? _uploadError;
-  double xp = 0.4;
 
   Future<void> _pickAndUploadImage() async {
     final picker = ImagePicker();
@@ -37,18 +36,25 @@ class _ProfilePageState extends State<ProfilePage> {
         final downloadUrl = await storageRef.getDownloadURL();
         debugLog('[Profile] Retrieved download URL: $downloadUrl');
 
+        final fileInfo = await DefaultCacheManager().getFileFromCache(downloadUrl);
+        if (fileInfo != null) {
+          await DefaultCacheManager().removeFile(downloadUrl);
+          debugLog('[Profile] Cached image removed');
+        } else {
+          debugLog('[Profile] No cached image found to remove');
+        }
+
         await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
-          .update({'profileImageUrl': downloadUrl});
+          .set({'profileImageUrl': downloadUrl}, SetOptions(merge: true));
         debugLog('[Profile] Firestore updated with new image URL');
 
         setState((){
-          _profileImage = file;
           _uploadError = null;
         });
 
-        Provider.of<ProfileProvider>(context, listen: false).updateProfileImage(downloadUrl);
+        Provider.of<UserProvider>(context, listen: false).updateProfile(imageUrl: downloadUrl);
         debugLog('[Profile] Provider updated with new image');
       } catch (e) {
         debugLog('[Profile] Image upload error: $e');
@@ -62,12 +68,6 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void _showImageDialog(BuildContext context, String imageUrl) {
-    final imageProvider = _profileImage != null
-      ? FileImage(_profileImage!)
-      : imageUrl.isNotEmpty
-        ? NetworkImage(imageUrl)
-        : const AssetImage('assets/images/default_avatar.png') as ImageProvider;
-
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -75,69 +75,80 @@ class _ProfilePageState extends State<ProfilePage> {
         return Dialog(
           backgroundColor: Colors.transparent,
           insetPadding: EdgeInsets.zero,
-          child: Stack( //StatefulBuilder!!!
-            children: [
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-                  child: Container(
-                    color: Colors.black.withOpacity(0),
-                    width: double.infinity,
-                    height: double.infinity,
-                  ),
-                ),
-              ),
-              Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                    children: [
-                    CircleAvatar(
-                      radius: 80,
-                      backgroundImage: imageProvider
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () async {
-                        await _pickAndUploadImage();
-
-                        setState(() {});
-                      },
-                      child: const Text("Change profile picture"),
-                    ),
-                    if (_uploadError != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
-                        child: Text(
-                          _uploadError!,
-                          style: const TextStyle(
-                            color: Colors.red,
-                            fontSize: 14,
-                          ),
-                        ),
+          child: StatefulBuilder(
+            builder: (context, setStateDialog) {
+              return Stack(
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                      child: Container(
+                        color: Colors.black.withOpacity(0),
+                        width: double.infinity,
+                        height: double.infinity,
                       ),
-                  ],
-                )
-              )
-            ],
-          )
+                    ),
+                  ),
+                  Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        UserAvatar(
+                          imageUrl: imageUrl,
+                          radius: 80,
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () async {
+                            await _pickAndUploadImage();
+                            setStateDialog(() {});
+                          },
+                          child: const Text("Change profile picture"),
+                        ),
+                        if (_uploadError != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              _uploadError!,
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
         );
-      }
+      },
     );
+  }
+
+  int levelUpXP(int level) {
+    return 100 + (level * 50);
   }
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final profileProvider = Provider.of<ProfileProvider>(context);
-    final imageUrl = profileProvider.imageUrl;
-    final userName = FirebaseAuth.instance.currentUser?.displayName ?? 'User';
+    final userProvider = Provider.of<UserProvider>(context);
 
-    final imageProvider = _profileImage != null
-      ? FileImage(_profileImage!)
-      : imageUrl.isNotEmpty
-        ? NetworkImage(imageUrl)
-        : const AssetImage('assets/images/default_avatar.png') as ImageProvider;
+    final imageUrl = userProvider.imageUrl;
+    final userName = userProvider.cachedDisplayName;
+
+    final int level = userProvider.level;
+    final int xp = userProvider.xp;
+
+    final int neededXP = levelUpXP(level);
+    final bool hasLeveledUp = xp >= neededXP;
+    final double progress = hasLeveledUp 
+      ? 0
+      : (xp / neededXP).clamp(0.0, 1.0);
 
     return Scaffold(
       appBar: AppBar(
@@ -162,13 +173,11 @@ class _ProfilePageState extends State<ProfilePage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(top: 4), // nudge avatar slightly up or down
-                  child: GestureDetector(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: UserAvatar(
+                    imageUrl: imageUrl,
+                    radius: 40,
                     onTap: () => _showImageDialog(context, imageUrl),
-                    child: CircleAvatar(
-                      radius: 40,
-                      backgroundImage: imageProvider,
-                    ),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -183,7 +192,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Level..',
+                        'Level $level',
                         style: textTheme.labelLarge,
                       ),
                       const SizedBox(height: 8),
@@ -191,7 +200,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
-                            '0/... XP',
+                            hasLeveledUp
+                              ? '0/ $neededXP XP'
+                              : '$xp / $neededXP XP',
                             style: textTheme.labelLarge,
                           ),
                           const SizedBox(width: 8),
@@ -207,7 +218,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ),
                                   FractionallySizedBox(
                                     alignment: Alignment.centerLeft,
-                                    widthFactor: xp.clamp(0.0, 1.0),
+                                    widthFactor: progress,
                                     child: Container(
                                       height: 14,
                                       color: Theme.of(context).colorScheme.primary,

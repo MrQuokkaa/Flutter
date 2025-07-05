@@ -61,3 +61,25 @@ class ToDoTile extends StatelessWidget {
     );
   }
 }
+
+// ignore: must_be_immutable
+class MyButton extends StatelessWidget {
+  
+  final String text;
+  VoidCallback onPressed;
+  
+  MyButton({
+    super.key, 
+    required this.text,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialButton(
+      onPressed: onPressed,
+      color: themeColor(context).secondary,
+      child: Text(text),
+    );
+  }
+}

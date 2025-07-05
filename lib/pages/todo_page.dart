@@ -1,7 +1,7 @@
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:intl/intl.dart';
 import '../exports/package_exports.dart';
 import '../exports/theme_exports.dart';
-import '../exports/page_exports.dart';
 import '../exports/data_exports.dart';
 import '../exports/util_exports.dart';
 
@@ -26,12 +26,10 @@ class _ToDoState extends State<ToDoPage> {
   void initState() {
     super.initState();
     db = Provider.of<FirestoreDataBase>(context, listen: false);
-    final settingsProvider = Provider.of<SettingsProvider>(context, listen: false);
 
     selectedDate = widget.selectedDate;
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await settingsProvider.loadSettings();
       await db.loadDataForDate(selectedDate);
       setState(() {});
     });

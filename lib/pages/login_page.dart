@@ -1,5 +1,4 @@
 import '../exports/package_exports.dart';
-import '../exports/theme_exports.dart';
 import '../exports/util_exports.dart';
 import '../exports/page_exports.dart';
 
@@ -15,6 +14,11 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,17 +61,26 @@ class _LoginPageState extends State<LoginPage> {
                     _passwordController.text.trim(),
                   );
                   if (user != null && context.mounted) {
-                    debugLog('[Login] User authenticated');
-                    final themeProvider =
-                        Provider.of<ThemeProvider>(context, listen: false);
-                    await themeProvider.loadFromFirestore();
-                    debugLog('[Login] Theme loaded, User is being logged in..');
+                    final userProvider = Provider.of<UserProvider>(context, listen: false);
+                    await userProvider.loadUserData();
+                    debugLog('[Login] Theme loaded..');
+                    
+                    final imageUrl = userProvider.imageUrl;
+                    if (imageUrl.isNotEmpty) {
+                      await precacheImage(CachedNetworkImageProvider(imageUrl), context);
+                      debugLog('[Login] Profile image cached..');
+                    } else {
+                      await precacheImage(const AssetImage('assets/images/default_avatar.png'), context);
+                      debugLog('[Login] Default avatar cached..');
+                    }
+                    
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                         builder: (context) => MainPage(),
                       ),
                     );
+                    debugLog('[Login] User is being logged in..');
                   }
                 } catch (e) {
                   setState(() => _error = e.toString());

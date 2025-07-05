@@ -66,10 +66,16 @@ class _RegisterPageState extends State<RegisterPage> {
                 }
 
                 try {
+                  final userProvider = Provider.of<UserProvider>(context, listen: false);
+                  
                   final user = await f.register(name, email, password);
-                  debugLog(
-                      '[Register] User succesfully registered, redirecing..');
+
+                  debugLog('[Register] Checking created user data..');
+                  userProvider.clearProfile();
+                  userProvider.loadUserData();
+
                   if (user != null && context.mounted) {
+                    debugLog('[Register] Navigating to app..');              
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(

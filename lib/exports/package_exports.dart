@@ -11,4 +11,5 @@ export '../firebase_options.dart';
 export 'package:google_fonts/google_fonts.dart';
 export 'package:hive_flutter/hive_flutter.dart';
 export 'package:provider/provider.dart';
-export 'package:intl/intl.dart';
+export 'package:cached_network_image/cached_network_image.dart';
+export 'package:flutter_cache_manager/flutter_cache_manager.dart';

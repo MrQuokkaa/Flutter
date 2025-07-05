@@ -32,12 +32,12 @@ class _SettingsPageState extends State<SettingsPage> {
   void initState() {
     super.initState();
     selectedTheme =
-        Provider.of<ThemeProvider>(context, listen: false).themeName;
+        Provider.of<UserProvider>(context, listen: false).themeName;
   }
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
     final textTheme = Theme.of(context).textTheme;
 
     final sortedPresets = presets.toList()
@@ -167,8 +167,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     if (value == null) return;
                     setState(() => selectedTheme = value);
 
-                    final brightness = themeProvider.brightness;
-                    await themeProvider.setTheme(value, brightness: brightness);
+                    final brightness = userProvider.brightness;
+                    await userProvider.updateTheme(value, brightness: brightness);
                     debugLog('[Settings] Theme updated and saved for user');
                   },
                 ),
